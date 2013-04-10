@@ -1,0 +1,23 @@
+name = "Migrate Exframe"
+description = "Migrate exframe."
+package = "Development"
+core = 7.x
+dependencies[] = taxonomy
+dependencies[] = image
+dependencies[] = comment
+dependencies[] = migrate
+dependencies[] = migrate_extras
+dependencies[] = list
+dependencies[] = number
+
+;node_reference is useful but not required
+;dependencies[] = node_reference
+
+files[] = user.inc
+files[] = node_biblio.inc
+files[] = user_internal_profile.inc
+files[] = node_saage_bioassay_groups.inc
+files[] = node_saage_bioassays.inc
+files[] = node_saage_biomaterial.inc
+files[] = node_saage_experiment.inc
+files[] = node_saage_groups.inc

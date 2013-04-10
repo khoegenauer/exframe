@@ -1,0 +1,218 @@
+section	subsection	field	variable	isa_value
+investigation	in_ont	ONTOLOGY SOURCE REFERENCE	header	
+investigation	in_ont	Term Source Name	ont_short_name	
+investigation	in_ont	Term Source File		
+investigation	in_ont	Term Source Version	ont_version	
+investigation	in_ont	Term Source Description	ont_long_name	
+investigation	in_general	INVESTIGATION	header	
+investigation	in_general	Investigation Identifier		
+investigation	in_general	Investigation Title		
+investigation	in_general	Investigation Description		
+investigation	in_general	Investigation Submission Date		
+investigation	in_general	Investigation Public Release Date		
+investigation	in_pub	INVESTIGATION PUBLICATIONS	header	
+investigation	in_pub	Investigation PubMed ID	pubmed_id	
+investigation	in_pub	Investigation Publication DOI	doi	
+investigation	in_pub	Investigation Publication Author list	author_list	
+investigation	in_pub	Investigation Publication Title	citation_title	
+investigation	in_pub	Investigation Publication Status	pub_status	
+investigation	in_pub	Investigation Publication Status Term Accession Number	pub_status_oid	
+investigation	in_pub	Investigation Publication Status Term Source REF	pub_status_ont	
+investigation	in_contacts	INVESTIGATION CONTACTS	header	
+investigation	in_contacts	Investigation Person Last Name	familyName	
+investigation	in_contacts	Investigation Person Mid Initials	additionalName	
+investigation	in_contacts	Investigation Person First Name	givenName	
+investigation	in_contacts	Investigation Person Address		
+investigation	in_contacts	Investigation Person Phone		
+investigation	in_contacts	Investigation Person Fax		
+investigation	in_contacts	Investigation Person Email		
+investigation	in_contacts	Investigation Person Affiliation	affiliation	
+investigation	in_contacts	Investigation Person Roles		
+investigation	in_contacts	Investigation Person Roles Term Accession Number		
+investigation	in_contacts	Investigation Person Roles Term Source REF		
+study	stu_general	STUDY	header	
+study	stu_general	Study Identifier	accession	
+study	stu_general	Study Title	exp_title	
+study	stu_general	Study Submission Date	date	
+study	stu_general	Study Public Release Date		
+study	stu_general	Study Description	summary	
+study	stu_study_file	Study File Name	study_name	
+study	stu_design	STUDY DESIGN DESCRIPTORS	header	
+study	stu_design	Study Design Type	experiment_design_type	
+study	stu_design	Study Design Type Term Accession Number		
+study	stu_design	Study Design Type Term Source REF		
+study	stu_pub	STUDY PUBLICATIONS	header	
+study	stu_pub	Study PubMed ID	pubmed_id	
+study	stu_pub	Study Publication DOI	doi	
+study	stu_pub	Study Publication Author list	author_list	
+study	stu_pub	Study Publication Title	citation_title	
+study	stu_pub	Study Publication Status	pub_status	
+study	stu_pub	Study Publication Status Term Accession Number	pub_status_oid	
+study	stu_pub	Study Publication Status Term Source REF	pub_status_ont	
+study	stu_factors	STUDY FACTORS	header	
+study	stu_factors	Study Factor Name		
+study	stu_factors	Study Factor Type		
+study	stu_factors	Study Factor Type Term Accession Number		
+study	stu_factors	Study Factor Type Term Source REF		
+study	stu_assays	STUDY ASSAYS	header	
+study	stu_assays	Study Assay Measurement Type	isa_measurement_type	
+study	stu_assays	Study Assay Measurement Type Term Accession Number	mt_oid	
+study	stu_assays	Study Assay Measurement Type Term Source REF	mt_ont	
+study	stu_assays	Study Assay Technology Type	isa_technology_type	
+study	stu_assays	Study Assay Technology Type Term Accession Number	tt_oid	
+study	stu_assays	Study Assay Technology Type Term Source REF	tt_ont	
+study	stu_platforms	Study Assay Technology Platform	platform	
+study	stu_assay_file	Study Assay File Name	assay_name	
+study	stu_protocols	STUDY PROTOCOLS	header	
+study	stu_protocols	Study Protocol Name	protocol_name	
+study	stu_protocols	Study Protocol Type	protocol_name	
+study	stu_protocols	Study Protocol Type Term Accession Number		
+study	stu_protocols	Study Protocol Type Term Source REF		
+study	stu_protocols	Study Protocol Description	protocol_text	
+study	stu_protocols	Study Protocol URI		
+study	stu_protocols	Study Protocol Version		
+study	stu_protocols	Study Protocol Parameters Name	protocol_parameter	
+study	stu_protocols	Study Protocol Parameters Name Term Accession Number		
+study	stu_protocols	Study Protocol Parameters Name Term Source REF		
+study	stu_protocols	Study Protocol Components Name		
+study	stu_protocols	Study Protocol Components Type		
+study	stu_protocols	Study Protocol Components Type Term Accession Number		
+study	stu_protocols	Study Protocol Components Type Term Source REF		
+study	stu_contacts	STUDY CONTACTS	header	
+study	stu_contacts	Study Person Last Name	familyName	
+study	stu_contacts	Study Person First Name	givenName	
+study	stu_contacts	Study Person Mid Initials	additionalName	
+study	stu_contacts	Study Person Email		
+study	stu_contacts	Study Person Phone		
+study	stu_contacts	Study Person Fax		
+study	stu_contacts	Study Person Address		
+study	stu_contacts	Study Person Affiliation	affiliation	
+study	stu_contacts	Study Person Roles		
+study	stu_contacts	Study Person Roles Term Accession Number		
+study	stu_contacts	Study Person Roles Term Source REF		
+assay	microarray	Sample Name	replicate_name	
+assay	microarray	Protocol REF	extraction_protocol	RNA extraction
+assay	microarray	Extract Name	replicate_name	
+assay	microarray	Material Type	cellular_material	
+assay	microarray	Term Source REF	cellular_material_ont	
+assay	microarray	Term Accession Number	cellular_material_oid	
+assay	microarray	Protocol REF	label_protocol	labeling
+assay	microarray	Labeled Extract Name	replicate_name	
+assay	microarray	Label	label	
+assay	microarray	Term Source REF	label_ont	
+assay	microarray	Term Accession Number	label_oid	
+assay	microarray	Protocol REF	hybridization_protocol	nucleic acid hybridization
+assay	microarray	Hybridization Assay Name	replicate_name	
+assay	microarray	Array Design REF	platform	
+assay	microarray	Protocol REF	data_collection_protocol	data collection
+assay	microarray	Scan Name	replicate_filename	
+assay	microarray	Array Data File	replicate_file	
+assay	microarray	Protocol REF	normalization_protocol	normalization data transformation
+assay	microarray	Normalization Name	normalization_method	
+assay	microarray	Derived Array Data Matrix File	gct_file_url	
+assay	ip-seq	Sample Name	replicate_name	
+assay	ip-seq	Protocol REF	extraction_protocol	nucleic acid preparation
+assay	ip-seq	Parameter Value[cross linking]	cross_linking	
+assay	ip-seq	Parameter Value[DNA fragmentation]	fragmentation_method	
+assay	ip-seq	Parameter Value[DNA fragment size]	fragment_length_value	
+assay	ip-seq	Unit	fragment_length_unit	
+assay	ip-seq	Term Source REF	fragment_length_unit_ont	
+assay	ip-seq	Term Accession Number	fragment_length_unit_oid	
+assay	ip-seq	Parameter Value[immunoprecipitation antibody]	imp_antibody	
+assay	ip-seq	Extract Name	replicate_name	
+assay	ip-seq	Protocol REF	library_const_protocol	library preparation
+assay	ip-seq	Parameter Value[library source]	library_source	
+assay	ip-seq	Parameter Value[library strategy]	library_strategy	
+assay	ip-seq	Parameter Value[library selection]	library_selection	
+assay	ip-seq	Parameter Value[library layout]	library_layout	
+assay	ip-seq	Protocol REF	sequencing_protocol	nucleic acid sequencing
+assay	ip-seq	Parameter Value[sequencing instrument]	platform	
+assay	ip-seq	Parameter Value[base caller]	base_caller	
+assay	ip-seq	Term Source REF	base_caller_ont	
+assay	ip-seq	Term Accession Number	base_caller_oid	
+assay	ip-seq	Parameter Value[quality score]	quality_score_system	
+assay	ip-seq	Term Source REF	quality_score_system_ont	
+assay	ip-seq	Term Accession Number	quality_score_system_oid	
+assay	ip-seq	Assay Name	assay_name	
+assay	ip-seq	Raw Data File	replicate_file	
+assay	other-seq	Sample Name	replicate_name	
+assay	other-seq	Protocol REF	sample_preparation_protocol	nucleic acid preparation
+assay	other-seq	Parameter Value[cross linking]	cross_linking	
+assay	other-seq	Parameter Value[DNA fragmentation]	fragmentation_method	
+assay	other-seq	Parameter Value[DNA fragment size]	fragment_length_value	
+assay	other-seq	Unit	fragment_length_unit	
+assay	other-seq	Term Source REF	fragment_length_unit_ont	
+assay	other-seq	Term Accession Number	fragment_length_unit_oid	
+assay	other-seq	Extract Name	replicate_name	
+assay	other-seq	Protocol REF	library_preparation_protocol	library preparation
+assay	other-seq	Parameter Value[library source]	library_source	
+assay	other-seq	Parameter Value[library strategy]	library_strategy	
+assay	other-seq	Parameter Value[library selection]	library_selection	
+assay	other-seq	Parameter Value[library layout]	library_layout	
+assay	other-seq	Protocol REF	sequencing_protocol	nucleic acid sequencing
+assay	other-seq	Parameter Value[sequencing instrument]	platform	
+assay	other-seq	Parameter Value[base caller]	base_caller	
+assay	other-seq	Term Source REF	base_caller_ont	
+assay	other-seq	Term Accession Number	base_caller_oid	
+assay	other-seq	Parameter Value[quality score]	quality_score_system	
+assay	other-seq	Term Source REF	quality_score_system_ont	
+assay	other-seq	Term Accession Number	quality_score_system_oid	
+assay	other-seq	Assay Name	assay_name	
+assay	other-seq	Raw Data File	replicate_file	
+sample	biomaterial	Source Name	biomaterial_name	
+sample	biomaterial	Characteristics[organism]	organism	
+sample	biomaterial	Term Source REF	organism_ont	
+sample	biomaterial	Term Accession Number	organism_oid	
+sample	biomaterial	Characteristics[strain]	strain	
+sample	biomaterial	Term Source REF	strain_ont	
+sample	biomaterial	Term Accession Number	strain_oid	
+sample	biomaterial	Characteristics[organism part]	tissue_type	
+sample	biomaterial	Term Source REF	tissue_type_ont	
+sample	biomaterial	Term Accession Number	tissue_type_oid	
+sample	biomaterial	Characteristics[development stage]	developmental_stage	
+sample	biomaterial	Term Source REF	developmental_stage_ont	
+sample	biomaterial	Term Accession Number	developmental_stage_oid	
+sample	biomaterial	Characteristics[age]	age	
+sample	biomaterial	Term Source REF	age_ont	
+sample	biomaterial	Term Accession Number	age_oid	
+sample	biomaterial	Characteristics[sex]	sex	
+sample	biomaterial	Term Source REF	sex_ont	
+sample	biomaterial	Term Accession Number	sex_oid	
+sample	biomaterial	Characteristics[genotype]	genotype	
+sample	biomaterial	Term Source REF	genotype_ont	
+sample	biomaterial	Term Accession Number	genotype_oid	
+sample	biomaterial	Characteristics[gene]	genes	
+sample	biomaterial	Term Source REF	genes_ont	
+sample	biomaterial	Term Accession Number	genes_oid	
+sample	biomaterial	Characteristics[cell type]	cell_type	
+sample	biomaterial	Term Source REF	cell_type_ont	
+sample	biomaterial	Term Accession Number	cell_type_oid	
+sample	biomaterial	Characteristics[postive markers]	positive_markers	
+sample	biomaterial	Term Source REF	positive_markers_ont	
+sample	biomaterial	Term Accession Number	positive_markers_oid	
+sample	biomaterial	Characteristics[negative markers]	negative_markers	
+sample	biomaterial	Term Source REF	negative_markers_ont	
+sample	biomaterial	Term Accession Number	negative_markers_oid	
+sample	biomaterial	Characteristics[disease state]	disease_state	
+sample	biomaterial	Term Source REF	disease_state_ont	
+sample	biomaterial	Term Accession Number	disease_state_oid	
+sample	biomaterial	Characteristics[time course]	time_point	
+sample	biomaterial	Term Source REF	time_point_ont	
+sample	biomaterial	Term Accession Number	time_point_oid	
+sample	biomaterial	Characteristics[passages]	passages	
+sample	biomaterial	Term Source REF	passages_ont	
+sample	biomaterial	Term Accession Number	passages_oid	
+sample	biomaterial	Characteristics[biomarkers]	biomarkers	
+sample	biomaterial	Term Source REF	biomarkers_ont	
+sample	biomaterial	Term Accession Number	biomarkers_oid	
+sample	biomaterial	Characteristics[surface markers]	surface_markers	
+sample	biomaterial	Term Source REF	surface_markers_ont	
+sample	biomaterial	Term Accession Number	surface_markers_oid	
+sample	biomaterial	Characteristics[growth protocol]	growth_protocol	
+sample	biomaterial	Characteristics[treatment]	treatment_compound	
+sample	biomaterial	Term Source REF	treatment_compound_ont	
+sample	biomaterial	Term Accession Number	treatment_compound_oid	
+sample	biomaterial	Characteristics[treatment protocol]	treatment_protocol	
+sample	biomaterial	Characteristics[notes]	biomaterial_notes	
+sample	biomaterial	Protocol REF	biomaterial_protocol	
+sample	biomaterial	Sample Name	replicate_name	

@@ -1,0 +1,97 @@
+Field_Name	Ontology_Preferred_Term	Ontology	Ontology_Term_ID	Term_Ontology_URL	Dataframe	Variable
+Experiment	investigation	obo	OBI_0000066	<http://purl.obolibrary.org/obo/OBI_0000066>		exp_nid
+Experiment Title	title	dc	title	<http://purl.org/dc/terms/title>	Experiment	title
+Design Type	study_design	obo	OBI_0500000	<http://purl.obolibrary.org/OBI_0500000>	Experiment	experiment_design_type
+Summary	 investigation description	obo	OBI_0001615	<http://purl.obolibrary.org/OBI_0001615>	Experiment	summary
+Contacts	principal investigator role	obo	OBI_0000103	<http://purl.obolibrary.org/obo/OBI_0000103>	Experiment	contact
+External Reference	BibliographicReference	mged	BibliographicReference	<http://mged.sourceforge.net/ontologies/MGEDOntology.owl#BibliographicReference>	Experiment	external_reference
+Curator	curator	efo	EFO_0001733	<http://www.ebi.ac.uk/efo/EFO_0001733>	Experiment	curator
+Accession	identifier	dc	identifier	<http://purl.org/dc/terms/identifier>	Experiment	accession
+Author	creator	dc	creator	<http://purl.org/dc/terms/creator>		drupal_creator
+Date	date	dc	date	<http://purl.org/dc/terms/date>	Experiment	date
+Biblio Reference/Citation	citation	obo	IAO_0000301	<http://purl.obolibrary.org/obo/IAO_0000301>	Experiment	citations
+					Citation	citation_nid
+Article Title	title	dc	title		Citation	title
+Pubmed_id				<http://purl.org/ontology/bibo/pmid>	Citation	pubmed_id
+Date of Issue				<http://purl.org/ontology/bibo/doi>	Citation	doi
+Author list				<http://isa.test.org/author_list>	Citation	author_list
+Reseacher Analyzed Data	data set	obo	IAO_0000100	<http://purl.obolibrary.org/obo/IAO_0000100>	Experiment	researcher_analysis
+					Researcher_AD	researcher_ad_fid
+Analysis Name	title	dc	title		Researcher_AD	title
+Analysis Description	description	efo	description	<http://www.ebi.ac.uk/efo/description>	Researcher_AD	analysis_description
+Analysis File	data file	efo	EFO_0004095	<http://www.ebi.ac.uk/efo/EFO_0004095>	Researcher_AD	analysis_file
+Analysis File Type	data format specification	obo	IAO_0000098	<http://purl.obolibrary.org/obo/IAO_0000098>	Researcher_AD	analysis_file_format
+Bioassays	assay	obo	OBI_0000070	<http://purl.obolibrary.org/obo/OBI_0000070>	Experiment	bioassays
+Bioassay Node					Bioassay	bioassay_nid
+Bioassay Name	title	dc	title		Bioassay	title
+Measurement Type	has_measurement_type	mged	has_measurement_type	<http://mged.sourceforge.net/ontologies/MGEDOntology.owl#has_measurement_type>	Bioassay	measurement_type
+Platform	platform	mged	platform	<http://mged.sourceforge.net/ontologies/MGEDontology.php#platform>	Bioassay	platform
+Distinguishing Factor	experimental factor	efo	EFO_0000001	<http://www.ebi.ac.uk/efo/EFO_0000001>	Bioassay	factor
+Notes		isa	assay_notes	<http://isa.test.org/assay_notes>	Bioassay	bioassay_notes
+Extract Molecule	BioSampleType	mged	BioSampleType	<http://mged.sourceforge.net/ontologies/MGEDontology.php#BioSampleType>	Bioassay	cellular_material
+Extraction Protocol	extraction protocol	efo	EFO_0000490	<http://www.ebi.ac.uk/efo/EFO_0000490>	Bioassay	extraction_protocol
+Label	LabelCompound	mged	LabelCompound	<http://mged.sourceforge.net/ontologies/MGEDontology.php#LabelCompound>	Bioassay	label
+Labeling Protocol	labelling protocol	efo	EFO_0003808	<http://www.ebi.ac.uk/efo/EFO_0003808>	Bioassay	label_protocol
+Hybridization Protocol	hybridization protocol	efo	EFO_0003790	<http://www.ebi.ac.uk/efo/EFO_0003790>	Bioassay	hybridization_protocol
+Scan Protocol	array scanning protocol	efo	EFO_0003814	<http://www.ebi.ac.uk/efo/EFO_0003814>	Bioassay	scan_protocol
+Cross-linking Method	cross linking	obo	OBI_0000800	<http://purl.obolibrary.org/obo/OBI_0000800>	Bioassay	cross_linking
+Immunoprecipitation Antibody	"immunoglobulin complex, circulating"	obo	GO_0042571	<http://purl.obolibrary.org/obo/GO_0042571>	Bioassay	imp_antibody
+Fragmentation Method	chemical cleavage	obo	OBI_0000943	<http://purl.obolibrary.org/obo/OBI_0000943>	Bioassay	fragmentation_method
+Fragment Length	length	obo	PATO_0000122	<http://purl.obolibrary.org/obo/PATO_0000122>	Bioassay	fragment_length_value
+Fragment Length Unit	length unit	obo	UO_0000001	<http://purl.obolibrary.org/obo/UO_0000001>	Bioassay	fragment_length_unit
+Library Construction Protocol	nucleic acid library construction protocol	efo	EFO_0004184	<http://www.ebi.ac.uk/efo/EFO_0004184>	Bioassay	library_const_protocol
+Library Source	seq_library_source	efo	EFO_0004104	<http://www.ebi.ac.uk/efo/EFO_0004104>	Bioassay	library_source
+Library Strategy	seq_library_strategy	efo	EFO_0004102	<http://www.ebi.ac.uk/efo/EFO_0004102>	Bioassay	library_strategy
+Library Selection	seq_library_selection	efo	EFO_0004105	<http://www.ebi.ac.uk/efo/EFO_0004105>	Bioassay	library_selection
+Library Layout		isa	library_layout	<http://isa.test.org/library_layout>	Bioassay	library_layout
+Base Caller		isa	base_caller	<http://isa.test.org/base_caller>	Bioassay	base_caller
+Quality Score System		isa	quality_score_system	<http://isa.test.org/quality_score_system>	Bioassay	quality_score_system
+Replicates	replicate	efo	EFO_0000683	<http://www.ebi.ac.uk/efo/EFO_0000683>	Bioassay	replicate
+					Replicate	replicate_fid
+Replicate Name	title	dc	title		Replicate	title
+Replicate Data Files	measurement datum	obo	IAO_0000109	<http://purl.obolibrary.org/obo/IAO_0000109>	Replicate	replicate_file
+Replicate Type	ReplicateDescription	mged	ReplicateDescription	<http://mged.sourceforge.net/ontologies/MGEDOntology.owl#ReplicateDescription>	Replicate	replicate_type
+Biomaterial	specimen	obo	OBI_0100051	<http://purl.obolibrary.org/obo/OBI_0100051>	Replicate	replicate_biomaterial
+					Biomaterial	biomaterial_nid
+					Biomaterial	title
+Organism	organism	obo	OBI_0100026	<http://purl.obolibrary.org/obo/OBI_0100026>	Biomaterial	organism
+Strain	strain	obo	OBI_0001185	<http://purl.obolibrary.org/obo/OBI_0001185>	Biomaterial	strain
+Developmental Stage	life cycle stage	obo	UBERON_0000105	<http://purl.obolibrary.org/obo/UBERON_0000105>	Biomaterial	developmental_stage
+Age	age	obo	PATO_0000011	<http://purl.obolibrary.org/obo/PATO_0000011>	Biomaterial	age
+Sex	biological sex	obo	PATO_0000047	<http://purl.obolibrary.org/obo/PATO_0000047>	Biomaterial	sex
+Tissue Type	gross anatomical part	obo	CARO_0001008	<http://purl.obolibrary.org/obo/CARO_0001008>	Biomaterial	tissue_type
+Cell Type	cell	obo	CL_0000000	<http://purl.obolibrary.org/obo/CL_0000000>	Biomaterial	cell_type
+Genetic Characteristics	genetic characteristics information	obo	OBI_0001404	<http://purl.obolibrary.org/obo/OBI_0001404>	Biomaterial	genotype
+Genes	gene	efo	EFO_0002606	<http://www.ebi.ac.uk/efo/EFO_0002606>	Biomaterial	genes
+Passages	generation	efo	EFO_0000507	<http://www.ebi.ac.uk/efo/EFO_0000507>	Biomaterial	passages
+Cell Surface Markers		isa	cell_surface_markers	<http://isa.test.org/cell_surface_markers>	Biomaterial	surface_markers
+Additional Biomarkers		isa	biomarkers	<http://isa.test.org/biomarkers>	Biomaterial	biomarkers
+Disease State	disease	obo	OBI_1110055	<http://purl.obolibrary.org/obo/OBI_1110055>	Biomaterial	disease_state
+Treatment Compound	molecular entity	obo	CHEBI_23367	<http://purl.obolibrary.org/obo/CHEBI_23367>	Biomaterial	treatment_compound
+Treatment Protocol	treatment protocol	efo	EFO_0003969	<http://www.ebi.ac.uk/efo/EFO_0003969>	Biomaterial	treatment_protocol
+Time Point	sampling time	efo	EFO_0000689	<http://www.ebi.ac.uk/efo/EFO_0000689>	Biomaterial	time_point
+Growth Protocol	growth protocol	efo	EFO_0003789	<http://www.ebi.ac.uk/efo/EFO_0003789>	Biomaterial	growth_protocol
+Notes	biomaterial_notes	isa	biomaterial_notes	<http://isa.test.org/biomaterial_notes>	Biomaterial	biomaterial_notes
+Positive Markers	positive_markers	isa	positive_markers	<http://isa.test.org/positive_markers>	Biomaterial	positive_markers
+Negative Markers	negative_markers	isa	negative_markers	<http://isa.test.org/negative_markers>	Biomaterial	negative_markers
+item	item	other	item	<http://rdfs.org/sioc/ns#Item>	Extra	item
+document	document	other	document	<http://xmlns.com/foaf/0.1/Document>	Extra	document
+comments	comments	other	comments	<http://www.w3.org/2001/XMLSchema#integer>	Extra	comments
+creator	creator	other	creator	<http://exframe-dev.sciencecollaboration.org/user/1>	Extra	creator
+created	created	other	created	<http://purl.org/dc/terms/created>	Extra	created
+modified	modified	other	modified	<http://purl.org/dc/terms/modified>	Extra	modified
+comments	comments	other	comments	<http://rdfs.org/sioc/ns#num_replies>	Extra	comments
+					Profile	contact_uid
+name	name	other		<http://xmlns.com/foaf/0.1/name>	Profile	username
+givenName	givenName	other		<http://schema.org/givenName>	Profile	givenName
+additionalName	additionalName	other		<http://schema.org/additionalName>	Profile	additionalName
+familyName	familyName	other		<http://schema.org/familyName>	Profile	familyName
+affiliation	affiliation	other		<http://schema.org/affiliation>	Profile	affiliation
+department	department	other		<http://isa.test.org/department>	Profile	department
+telephone	telephone	other		<http://schema.org/telephone>	Profile	telephone
+addressCountry	addressCountry	other		<http://schema.org/addressCountry>	Profile	addressCountry
+addressRegion	addressRegion	other		<http://schema.org/addressRegion>	Profile	addressRegion
+addressLocality	addressLocality	other		<http://schema.org/addressLocality>	Profile	addressLocality
+postalCode	postalCode	other		<http://schema.org/postalCode>	Profile	postalCode
+streetAddress	streetAddress	other		<http://schema.org/streetAddress>	Profile	streetAddress
+lab	lab	other		<http://isa.test.org/lab>	Profile	lab

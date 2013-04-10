@@ -1,0 +1,4 @@
+name = SCF biblio
+description = Customization of biblio for SCF
+core = 7.x
+files[] = scfbiblio.module

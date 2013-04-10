@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * Code for the scc_config feature.
+ */
+
+include_once 'scc_config.features.inc';
+
+/**
+ * Exportable content is used via uuid_features in order to store the content
+ * of the blocks (e.g. homepage blocks). The content is stored in nodes of type
+ * xf_exportable_content which are exported in features via their UUID.
+ * Each node is exposed as a block and these blocks are available for
+ * placement in the context UI for example.
+ */
+
+function _scc_config_exportable_content() {
+  // Associate each UUID to a block delta.
+  // Block deltas cannot be larger than 32 chars.
+  return array(
+    'scc_config_browse' => '091a26c4-b04a-74b4-0941-8a744b2cc52b',
+    'scc_config_search' => 'c919f4c7-36d4-ed24-f18f-048e76772b08',
+    'scc_config_code' => '4e4b51dd-daa3-1694-4d3e-5a87df48cd10',
+    'scc_config_analyze' => '1354cdef-f362-aef4-5d34-25e2b0092fad',
+    'scc_config_visualize' => '431b5ec5-0f9f-2c04-7d0f-232daed9251e',
+    'scc_config_whoweare' => '57adc8f2-0bca-dc84-f958-d6b414760254',
+    'scc_config_becomeamem' => '378fd023-ae06-f844-695f-c5feed70cc5a',
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function scc_config_block_info() {
+  $blocks = array();
+  $name_uuid_map = _scc_config_exportable_content();
+  $uuid_name_map = array_flip($name_uuid_map);
+  $nodes = entity_uuid_load('node', array($name_uuid_map), array(), TRUE);
+  foreach ($nodes as $node) {
+    if (!empty($node) && !empty($node->field_xf_content_name[LANGUAGE_NONE][0]['safe_value'])) {
+      $blocks[$uuid_name_map[$node->uuid]] = array(
+       'info' => 'scc_configs: ' . $node->field_xf_content_name[LANGUAGE_NONE][0]['safe_value'],
+      );
+    };
+  }
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function scc_config_block_view($delta = '') {
+  $block = array();
+  $uuids_map = _scc_config_exportable_content();
+
+  $node = current(entity_uuid_load('node', array($uuids_map[$delta])));
+
+  $block['subject'] = $node->title;
+  $render = node_view($node);
+  $block['content'] = render($render['body']);
+
+  return $block;
+}

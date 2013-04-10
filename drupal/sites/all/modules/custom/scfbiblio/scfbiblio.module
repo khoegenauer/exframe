@@ -1,0 +1,425 @@
+<?php
+/**
+ * @file scfbiblio.module
+ *
+ * Allows bypassing biblio behavior and allows to use different biblio styles
+ * depending on the node view mode.
+ */
+
+//Frequency at which each pending biblio node should be synced from pubmed.
+define('SCFBIBLIO_PENDING_DATE_FREQUENCY', 60 * 60 * 24 * 7); // 7 days.
+
+/**
+ * Implements hook_node_view_alter().
+ */
+function scfbiblio_node_view_alter(&$build) {
+  if ($build['#node']->type == 'biblio') {
+    $view_mode = $build['#view_mode'];
+
+    // Collect all styles declared by modules.
+    $styles = module_invoke_all('scfbiblio_styles');
+
+    // Attempts to find a style matching the build mode.
+    if (array_key_exists($view_mode, $styles)) {
+      $style = $styles[$view_mode];
+      require_once DRUPAL_ROOT . '/' . $style['path'];
+      $style_function = $style['name'];
+      if (function_exists($style_function)) {
+        $build[$view_mode]['#markup'] = $style_function ($build['#node']);
+      }
+      // Destroy biblio's core markup on full view mode which gets placed into
+      // a 'body' key.
+      if (!empty($build['body']['#markup'])) {
+        unset($build['body']['#markup']);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_access().
+ */
+function scfbiblio_field_access($op, $field, $entity_type, $entity, $account) {
+  // Prevent editors from setting a value for epub, since this is managed
+  // programatically only. The 'view' access of that field is left up to the
+  // regular display settings managed via features.
+  if ($field['field_name'] == 'field_msdf_epub_date' && $op == 'edit') {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+/**
+ * Implements hook_scfbiblio_styles().
+ */
+function scfbiblio_scfbiblio_styles() {
+  return array(
+    'scfbiblio_style_pow' => array(
+      'name' => 'scfbiblio_style_default',
+      'path' => drupal_get_path('module', 'scfbiblio') . '/styles/scfbiblio_style_pow.inc',
+    ),
+    'scfcustom' => array(
+      'name' => 'scfbiblio_style_pow',
+      'path' => drupal_get_path('module', 'scfbiblio') . '/styles/scfbiblio_style_pow.inc',
+    ),
+    'full' => array(
+      'name' => 'scfbiblio_style_pow',
+      'path' => drupal_get_path('module', 'scfbiblio') . '/styles/scfbiblio_style_pow.inc',
+    ),
+    'teaser' => array(
+      'name' => 'scfbiblio_style_pow',
+      'path' => drupal_get_path('module', 'scfbiblio') . '/styles/scfbiblio_style_pow.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function scfbiblio_block_info() {
+  $blocks['authors_in']['info'] = t('The Authors in');
+  $blocks['authors_in']['cache'] = DRUPAL_NO_CACHE;
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function scfbiblio_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'authors_in':
+      if (user_access('access content')) {
+        $node = node_load(arg(1));
+
+        if (empty($node->biblio_contributors)) {
+          return;
+        }
+
+        drupal_add_js(drupal_get_path('module', 'scfbiblio') . '/scfbiblio.js');
+        drupal_add_css(drupal_get_path('module', 'scfbiblio') . '/scfbiblio.css');
+        $authors = $node->biblio_contributors;
+
+        // Google scholar
+        $output = '<h3 class="collapsible">Google Scholar</h3><ul>';
+        foreach ($authors as $author) {
+          $output .= '<li>' . l($author['name'], 'http://scholar.google.com/scholar?q=' . $author['name']) . '</li>';
+        }
+        $output .= '</ul>';
+
+        // PubMed
+        $output .= '<h3 class="collapsible">PubMed</h3><ul>';
+        foreach ($authors as $author) {
+          $firstname_1 = (!empty($author['firstname']{0})) ? $author['firstname']{0} : '';
+          $output .= '<li>' . l($author['name'], 'http://www.ncbi.nlm.nih.gov/pubmed?term="' . $author['lastname'] . ' ' . $firstname_1 . '' . $author['initials'] . '"[Author]') . '</li>';
+        }
+        $output .= '</ul>';
+
+        // This site
+        $output .= '<h3 class="collapsible">' . variable_get('site_name') . '</h3><ul>';
+        foreach ($authors as $author) {
+          $output .= '<li>' . l($author['name'], 'search/site/', array(
+            'query' => array(
+              'f[0]' => 'ts_scfsearch_biblio_contributors:"' . $author['name'] . '"'
+              )
+            )
+          ) . '</li>';
+        }
+        $output .= '</ul>';
+
+        $block['subject'] = t('The Authors in ');
+        $block['content'] = $output;
+      }
+      return $block;
+  }
+}
+
+/**
+ * Implements hook_cron()
+ */
+function scfbiblio_cron() {
+  // Check pending keyword/date publications. We don't really care why it is
+  // still pending since we really on the md5 stored by biblio to detect a
+  // change in the XML from pubmed.
+  $result = db_query('SELECT * FROM {scfbiblio_pubmed_pending_sync} WHERE queued = 0 AND checked + :frequency < :time AND deleted = 0 LIMIT 20', array(
+    ':frequency' => SCFBIBLIO_PENDING_DATE_FREQUENCY,
+    ':time' => REQUEST_TIME,
+  ));
+  $queue = DrupalQueue::get('scfbiblio_pubmed_pending_sync');
+  foreach ($result as $pm) {
+    if ($queue->createItem($pm)) {
+      // Add timestamp to avoid queueing item more than once.
+      db_update('scfbiblio_pubmed_pending_sync')
+        ->fields(array('queued' => REQUEST_TIME))
+        ->condition('pmid', $pm->pmid)
+        ->execute();
+    }
+  }
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function scfbiblio_cron_queue_info() {
+  $queues['scfbiblio_pubmed_pending_sync'] = array(
+    'worker callback' => 'scfbiblio_pubmed_pending_sync_worker',
+    'time' => 60,
+  );
+  return $queues;
+}
+
+// Function called on cron to attempt syncing a biblio node.
+function scfbiblio_pubmed_pending_sync_worker($pm) {
+  module_load_include('inc', 'biblio', 'includes/biblio.import.export');
+
+  watchdog('scfbiblio_import_' . $pm->pmid, 'Processing PMID ' . $pm->pmid . ' from the keywords queue due to a change detected from PubMed.');
+
+  // Re-import the paper. Biblio pubmed module will check if the md5 of the xml
+  // from pubmed has changed and will update the node if necessary.
+  biblio_pm_import_ids(array($pm->pmid), array(), FALSE, NULL);
+}
+
+/**
+ * Implements hook_node_instert().
+ */
+function scfbiblio_node_insert($node) {
+  // Checks if dates and/or keywords are missing and flag the node to be
+  // synced later.
+  if ($node->type == 'biblio' && !empty($node->biblio_pubmed_id)) {
+    // Only add this node to the keywords queue if it does not have keywords
+    // from pubmed. No keywords @pmid 21940055, 21941651.
+    if (!$node->biblio_keywords) {
+      scfbiblio_set_pending_keywords_status($node);
+    }
+  }
+}
+
+/**
+ * Implements hook_node_instert().
+ */
+function scfbiblio_node_update($node) {
+  if ($node->type == 'biblio' && !empty($node->biblio_pubmed_id)) {
+    // Remove biblio node from keywords queue if the keywords are present.
+    // This is normally triggered by cron, but could also happen if an editor
+    // adds keywords to a biblio node. @todo allows for both sources of keywords
+    // to be supported, see older version of POW.
+    // A work around is to leave the biblio keywords alone and create a specific
+    // separate fields for the custom keywords. This might in fact be a cleaner
+    // approach as it separates the custom keywords from the PubMed ones.
+    if ($node->biblio_keywords) {
+      scfbiblio_unset_pending_keywords_status($node);
+    }
+  }
+}
+
+/**
+ * Implements hook_biblio_pm_node().
+ *
+ * Sets the right creation and epub dates for a node based on the pubmed data.
+ *
+ * This is used during the automatic and manual import or during a subsequent
+ * cron job, which will be triggered if the paper is still in aheadofprint
+ * status.
+ */
+function scfbiblio_biblio_pm_node_alter($node, $article) {
+  // 18446382 has an aheadofprint date and is in ppublish status.
+  // 20962230 does not have an aheadofprint date and is in ppublish status.
+  // 20976824 does not have an aheadofprint date and is in aheadofprint status.
+  // 1296     does not have an aheadofprint date nor a journal date.
+  // 11967257 has an unconventional aheadofprint which is not using digits but
+  //   intead uses strings as month (Apr).
+
+  // @test
+  // module_load_include('inc', 'biblio', 'includes/biblio.import.export');
+  // biblio_pm_import_ids(array('1296'), array(), FALSE, NULL)
+
+  // Mark node as "pending date" if the article is in aheadofprint state.
+  if ($article->PubmedData->PublicationStatus == 'aheadofprint') {
+    if (empty($node->nid)) {
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'PMID ' . $node->biblio_pubmed_id . ': aheadofprint status, new PubMed item added to the date queue.');
+    }
+    else {
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'PMID ' . $node->biblio_pubmed_id . ': aheadofprint status, PubMed item is in the date queue.', array(), WATCHDOG_NOTICE, l('view', 'node/' . $node->nid));
+    }
+    scfbiblio_set_pending_date_status($node);
+  }
+  else {
+    // Remove item from the queue if status changes.
+    if (!empty($node->nid)) {
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'PMID ' . $node->biblio_pubmed_id . ': Status changed and no longer aheadofprint. Remove from date queue.', array(), WATCHDOG_NOTICE, l('view', 'node/' . $node->nid));
+      scfbiblio_unset_pending_date_status($node);
+    }
+  }
+
+  // Checks whether there is an aheadofprint date available.
+  if ($aopdate = $article->PubmedData->xpath('.//History/PubMedPubDate[@PubStatus="aheadofprint"]')) {
+    // Converts the date to a timestamp.
+    if (empty($aopdate[0]->Year) || empty($aopdate[0]->Month) || empty($aopdate[0]->Day)) {
+      $msg = 'The aheadofprint date of PMID ' . $node->biblio_pubmed_id . ' was not complete';
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, $msg, array(), WATCHDOG_WARNING);
+      drupal_set_message($msg, 'warning');
+    }
+    $aopdate = _scfbiblio_parse_date($aopdate[0]);
+    // Use this date for the date of the node and epub value.
+    $node->created = $aopdate;
+    $node->field_msdf_epub_date[LANGUAGE_NONE][0]['value'] = $aopdate;
+    watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'PMID ' . $node->biblio_pubmed_id . ': aheadofprint date found and set to node creation and epub: ' . date("Y M d", $aopdate));
+  }
+  // Checks whether there is an epublish date available.
+  elseif ($aopdate = $article->PubmedData->xpath('.//History/PubMedPubDate[@PubStatus="epublish"]')) {
+    // Converts the date to a timestamp.
+    if (empty($aopdate[0]->Year) || empty($aopdate[0]->Month) || empty($aopdate[0]->Day)) {
+      $msg = 'The epublish date of PMID ' . $node->biblio_pubmed_id . ' was not complete';
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, $msg, array(), WATCHDOG_WARNING);
+      drupal_set_message($msg, 'warning');
+    }
+    $aopdate = _scfbiblio_parse_date($aopdate[0]);
+    // Use this date for the date of the node and epub value.
+    $node->created = $aopdate;
+    $node->field_msdf_epub_date[LANGUAGE_NONE][0]['value'] = $aopdate;
+    watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'PMID ' . $node->biblio_pubmed_id . ': epublish date found and set to node creation and epub: ' . date("Y M d", $aopdate));
+  }
+  // Checks whether there is an pubmed date available.
+  elseif ($aopdate = $article->PubmedData->xpath('.//History/PubMedPubDate[@PubStatus="pubmed"]')) {
+    // Converts the date to a timestamp.
+    if (empty($aopdate[0]->Year) || empty($aopdate[0]->Month) || empty($aopdate[0]->Day)) {
+      $msg = 'The pubmed date of PMID ' . $node->biblio_pubmed_id . ' was not complete';
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, $msg, array(), WATCHDOG_WARNING);
+      drupal_set_message($msg, 'warning');
+    }
+    $aopdate = _scfbiblio_parse_date($aopdate[0]);
+    // Use this date for the date of the node and epub value.
+    $node->created = $aopdate;
+    // No epub date for the pubmed date.
+    watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'PMID ' . $node->biblio_pubmed_id . ': pubmed date found and set to node creation date only: ' . date("Y M d", $aopdate));
+  }
+  else {
+    // Attempt to find the journal date for the node date.
+    // Do not display any epub date in this case.
+    if (empty($article->MedlineCitation->Article->Journal->JournalIssue->PubDate)) {
+      $msg = 'No aheadofprint, epublish, pubmed or journal date was found for PMID ' . $node->biblio_pubmed_id;
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, $msg, array(), WATCHDOG_WARNING);
+      drupal_set_message($msg, 'warning');
+    }
+    else {
+      $jdate = $article->MedlineCitation->Article->Journal->JournalIssue->PubDate;
+      // Reports any missing date element and reverts to first day of the month,
+      // or first month of the year.
+      $date = array();
+      if (empty($jdate->Day)) {
+        $date['day'] = '1';
+      }
+      else {
+        $date['day'] = (string)$jdate->Day;
+      }
+      // Extracts the month.
+      if (empty($jdate->Month)) {
+        $date['month'] = 'Jan';
+        $msg = 'No month found for the journal date of PMID ' . $node->biblio_pubmed_id . ', assuming first month of the year';
+        watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, $msg, array(), WATCHDOG_WARNING);
+        drupal_set_message($msg, 'warning');
+      }
+      else {
+        $date['month'] = (string)$jdate->Month;
+      }
+      // Extracts the year.
+      if (empty($jdate->Year)) {
+        $date['year'] = '0';
+        $msg = 'No year found for the journal date of PMID ' . $node->biblio_pubmed_id;
+        watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, $msg, array(), WATCHDOG_WARNING);
+        drupal_set_message($msg, 'warning');
+      }
+      else {
+        $date['year'] = (string)$jdate->Year;
+      }
+      // Generate UNIX timestamp for node date.
+      $node->created = strtotime($date['day'] . ' ' . $date['month'] . ' ' . $date['year']);
+      watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'PMID ' . $node->biblio_pubmed_id . ': no aheadofprint date found, journal date found and set to node creation date: ' . $date['day'] . ' ' . $date['month'] . ' ' . $date['year']);
+    }
+  }
+}
+
+/* Extracts unix timestamp from pubmed date
+ *
+ * The format of the dates provided by pubmed is unreliable. Most of the time
+ * it is all numeric, but sometimes the month is a string.
+ */
+function _scfbiblio_parse_date($date) {
+  if (empty($date->Month) || is_numeric((string)$date->Month)) {
+    return mktime(0, 0, 0, (string)$date->Month, (string)$date->Day, (string)$date->Year);
+  }
+  // Month is not numeric, try to parse the date via strtotime().
+  else {
+    return strtotime((string)$date->Month . ' ' . (string)$date->Day . ' ' . (string)$date->Year);
+  }
+}
+
+// This will set a node to be checked for dates via cron.
+function scfbiblio_set_pending_date_status($node) {
+  watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'Adding PMID ' . $node->biblio_pubmed_id . ' to the date queue.');
+  $status = db_merge('scfbiblio_pubmed_pending_sync')
+    ->key(array(
+      'pmid' => $node->biblio_pubmed_id,
+      'data_pending' => 'date',
+    ))
+    ->fields(array(
+      'checked' => REQUEST_TIME,
+      'queued' => 0,
+    ))
+    ->execute();
+}
+
+function scfbiblio_unset_pending_date_status($node) {
+  watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'Removing PMID ' . $node->biblio_pubmed_id . ' from the date queue.');
+  $status = db_merge('scfbiblio_pubmed_pending_sync')
+    ->key(array(
+      'pmid' => $node->biblio_pubmed_id,
+      'data_pending' => 'date',
+    ))
+    ->fields(array(
+      'deleted' => '1',
+    ))
+    ->execute();
+}
+
+// This will set a node to be checked for keywords via cron.
+function scfbiblio_set_pending_keywords_status($node) {
+  watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'Adding PMID ' . $node->biblio_pubmed_id . ' to the keywords queue.');
+  $status = db_merge('scfbiblio_pubmed_pending_sync')
+    ->key(array(
+      'pmid' => $node->biblio_pubmed_id,
+      'data_pending' => 'keywords',
+    ))
+    ->fields(array(
+      'checked' => REQUEST_TIME,
+      'queued' => 0,
+    ))
+    ->execute();
+}
+
+function scfbiblio_unset_pending_keywords_status($node) {
+  watchdog('scfbiblio_import_' . $node->biblio_pubmed_id, 'Removing PMID ' . $node->biblio_pubmed_id . ' from the keywords queue.');
+  $status = db_merge('scfbiblio_pubmed_pending_sync')
+    ->key(array(
+      'pmid' => $node->biblio_pubmed_id,
+      'data_pending' => 'keywords',
+    ))
+    ->fields(array(
+      'deleted' => '1',
+    ))
+    ->execute();
+}
+
+/*
+ * Implements hook_node_delete().
+ *
+ * Deletes flags from the scfbiblio_pubmed_pending_sync table.
+ */
+function scfbiblio_node_delete($node) {
+  if ($node->type == 'biblio' && !empty($node->biblio_pubmed_id)) {
+    db_delete('scfbiblio_pubmed_pending_sync')
+      ->condition('pmid', $node->biblio_pubmed_id)
+      ->execute();
+  }
+}

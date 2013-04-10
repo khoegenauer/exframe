@@ -1,0 +1,22 @@
+#block-scfbiblio-authors-in h3 {
+  margin: 0;
+  font-size: 100%;
+  font-family: Arial, Helvetica, Verdana,sans-serif;
+}
+#block-scfbiblio-authors-in h3.collapsible a:before {
+  content: "+ ";
+}
+#block-scfbiblio-authors-in h3.collapsible.expanded a:before {
+  content: "- ";
+}
+#block-scfbiblio-authors-in ul {
+  padding-left: 1em;
+}
+#block-scfbiblio-authors-in ul li {
+  border-bottom: 1px dotted #CCC;
+  list-style: square;
+  margin-left:12px;
+}
+#block-scfbiblio-authors-in ul li:first-child {
+  border-top: 1px dotted #CCC;
+}

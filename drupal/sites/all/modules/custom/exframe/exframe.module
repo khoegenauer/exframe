@@ -1,0 +1,479 @@
+<?php
+/**
+ * @file
+ * Code for the exframe feature.
+ */
+
+include_once 'exframe.features.inc';
+
+include_once 'exframe.entity_rdf.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function exframe_menu() {
+$items['admin/config/system/exframe'] = array(
+    'title' => 'eXframe settings',
+    'description' => 'Manage eXframe settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('exframe_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'exframe.admin.inc',
+    'weight' => 20,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_rdf_namespaces().
+ */
+function exframe_rdf_namespaces() {
+  return array(
+    'obo'      => 'http://purl.obolibrary.org/obo/',
+    'efo'      => 'http://www.ebi.ac.uk/efo/',
+    'mged'     => 'http://mged.sourceforge.net/ontologies/MGEDontology.php#',
+    'ncbi'     => 'http://bio2rdf.org/geneid:',
+    'ao'       => 'http://purl.org/ontology/ao/core#',
+    'isa'      => 'http://isa.test.org/',
+    'bibo'     => 'http://purl.org/ontology/bibo/',
+    'ro'       => 'http://purl.org/obo/owl/ro#',
+  );
+}
+
+/**
+ * Implements hook_taxonomy_term_presave().
+ */
+function exframe_taxonomy_term_presave($term) {
+  // Force tids since we want to maintain the same ones as the old site.
+  // We claim the tid in the tables taxonomy_term_data and
+  // taxonomy_term_hierarchy in order to trick taxonomy_term_save() into
+  // believing the term already exists (core does not support saving new terms
+  // with a custom tid).
+  if (module_exists('taxonomy_xml') && !empty($term->guid)) {
+    preg_match('/term-([0-9]*)/i', $term->guid, $matches);
+    if (!empty($matches[1])) {
+      $term->tid = $matches[1];
+      db_merge('taxonomy_term_data')
+        ->key(array('tid' => $term->tid))
+        ->fields(array('tid' => $term->tid))
+        ->execute();
+      db_merge('taxonomy_term_hierarchy')
+        ->key(array('tid' => $term->tid))
+        ->fields(array('tid' => $term->tid))
+        ->execute();
+    }
+  }
+
+  // Extracts preferred_uri from predicates and inserts it into the term before
+  // it is saved.
+  if (module_exists('taxonomy_xml') && !empty($term->predicates['http://www.w3.org/2004/02/skos/core#preferred_equivalent'][0])) {
+    $term->field_xf_preferred_uri[LANGUAGE_NONE][0]['value'] = $term->predicates['http://www.w3.org/2004/02/skos/core#preferred_equivalent'][0];
+  }
+}
+
+/**
+ * Implements MODULE_preprocess_HOOK().
+ */
+function exframe_preprocess_node(&$vars) {
+//dsm($vars);
+  if (!empty($vars['node']) && $vars['node']->type == 'xf_bioassay') {
+    // Specific CSS rules for the bioassays display.
+    drupal_add_css(drupal_get_path('module', 'exframe') . '/exframe.css');
+    drupal_add_js(drupal_get_path('module', 'exframe') . '/exframe.js');
+
+    $node = $vars['node'];
+    $replicates = field_get_items('node', $node, 'field_xf_replicate');
+
+    // Find all tids of organism and cell types used throughout the replicates.
+    $organism_tids = array();
+    $cell_type_tids = array();
+    if (!empty($node->field_xf_replicate[LANGUAGE_NONE])) {
+      foreach ($node->field_xf_replicate[LANGUAGE_NONE] as $item) {
+        $rep = entity_load('field_collection_item', array($item['value']));
+        if (!empty($rep[$item['value']]->field_xf_replicate_biomaterial[LANGUAGE_NONE])) {
+          foreach ($rep[$item['value']]->field_xf_replicate_biomaterial[LANGUAGE_NONE] as $biomaterial) {
+            if (!empty($biomaterial['entity']->field_xf_organism[LANGUAGE_NONE])) {
+              foreach ($biomaterial['entity']->field_xf_organism[LANGUAGE_NONE] as $tid) {
+                $organism_tids[] = $tid['tid'];
+              }
+            }
+            if (!empty($biomaterial['entity']->field_xf_cell_type[LANGUAGE_NONE])) {
+              foreach ($biomaterial['entity']->field_xf_cell_type[LANGUAGE_NONE] as $tid) {
+                $cell_type_tids[] = $tid['tid'];
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Iterate through all unique tids and combine the terms names for
+    // organisms...
+    $organism_tids = array_unique($organism_tids);
+    $organism_labels = array();
+    foreach ($organism_tids as $tid) {
+      $term = entity_load('taxonomy_term', array($tid));
+      $organism_labels[] = $term[$tid]->name;
+    }
+    $vars['content']['organisms'] = array('#markup' => implode(', ', $organism_labels));
+
+    // and cell types.
+    $cell_type_tids = array_unique($cell_type_tids);
+    $cell_type_labels = array();
+    foreach ($cell_type_tids as $tid) {
+      $term = entity_load('taxonomy_term', array($tid));
+      $cell_type_labels[] = $term[$tid]->name;
+    }
+    $vars['content']['cell_types'] = array('#markup' => implode(', ', $cell_type_labels));
+
+    // Compute replicate count in tpl variable.
+    if (!empty($node->field_xf_replicate[LANGUAGE_NONE])) {
+      $vars['content']['replicates_count'] = array('#markup' => count($node->field_xf_replicate[LANGUAGE_NONE]));
+    }
+    // Add our custom exframe bioassay template as theme hook suggestions.
+    $vars['theme_hook_suggestions'][] = 'exframe_bioassay';
+  }
+}
+
+/**
+ * Implements MODULE_preprocess_HOOK().
+ */
+function exframe_preprocess_field(&$vars) {
+  // Prepare Analyze button as a POST request using Drupal's Form API.
+  if (!empty($vars['element']['#field_name']) && $vars['element']['#field_name'] == 'field_xf_bioassay') {
+    // @todo use either the node id or the experiment UUID to put in the URL
+    // of the file to be inserted in the form.
+    $experiment = $vars['element']['#object'];
+    $id = $experiment->nid; // example where the id is the nid.
+    $vars['analyze_link']= render(drupal_get_form('exframe_analyze_button_form', $id));
+  }
+}
+
+function exframe_analyze_button_form($form, $form_state, $id) {
+  // This URL may be stored in a variable in the future when the code is
+  // released and made more generic.
+
+  $exframe_analyze_url = variable_get('exframe_analysis_service_url', base_path() . 'tools/analyze');
+
+  $file_url = exframe_get_isatab_file($id);
+
+  $form['#action'] = $exframe_analyze_url;
+
+  // @todo add the $id in the isa_tab_url value.
+  $form['isa_tab_url'] = array(
+    '#type' => 'hidden',
+    '#value' => $file_url,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Analyze »',
+  );
+  $form['throbber'] = array(
+    '#markup' => '<div id="exframe-analyze-button-throbber"></div>',
+  );
+
+  return $form;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function exframe_theme() {
+  return array(
+    'exframe_bioassay' => array(
+      'render element' => 'elements',
+      'template' => 'templates/exframe-bioassay',
+    ),
+    'field__field_xf_bioassay__xf_experiment' => array(
+      'render element' => 'elements',
+      'template' => 'templates/field--field-xf-bioassay--xf-experiment',
+    ),
+  );
+}
+
+function exframe_init() {
+  drupal_add_css(drupal_get_path('module', 'exframe') . '/exframe.css');
+  drupal_add_js(drupal_get_path('module', 'exframe') . '/exframe.js');
+}
+
+/**
+ * Implements hook_rdf_model_alter().
+ *
+ * This custom code adds some additional data to the RDF model which is not
+ * supported by the rdfx module (e.g. file and link fields).
+ */
+function exframe_rdf_model_alter($res, $type, $id) {
+  // Loads entity and its metadata.
+  $wrapper = entity_metadata_wrapper($type, $id);
+  $entity = $wrapper->value();
+  $entity_uri = rdfx_resource_uri($type, $entity);
+
+  // Custom extraction from entities and addition to RDF model.
+
+  // field_xf_replicate_file.
+  // This is necessary as field_collection does not have token support.
+  if ($type == 'field_collection_item' && $entity->field_name == 'field_xf_replicate') {
+    if (!empty($entity->field_xf_replicate_file[LANGUAGE_NONE])) {
+      // Find RDF mappings for field_xf_replicate_file field.
+      $predicates = rdfx_get_predicates($wrapper->field_xf_replicate_file, 'field_xf_replicate_file');
+      foreach ($predicates as $predicate) {
+        foreach ($entity->field_xf_replicate_file[LANGUAGE_NONE] as $item) {
+          $res->index[$entity_uri][$predicate][] = array(
+            'value' => file_create_url($item['uri']),
+            'type' => 'uri',
+          );
+        }
+      }
+    }
+  }
+
+  // biblio custom fields.
+  if ($type == 'node' && $entity->type == 'biblio') {
+    // Biblio doesn't have entity API integration so we need to extract the
+    // Entity RDF mapping manually.
+    $rdf_mappings = module_invoke_all('entity_rdf_mappings');
+
+    // PubMed ID.
+    if (!empty($entity->biblio_pubmed_id)) {
+      $predicates = $rdf_mappings['node:biblio:biblio_pubmed_id']['rdf properties'];
+      foreach ($predicates as $predicate) {
+        $res->index[$entity_uri][$predicate][] = array(
+          'value' => $entity->biblio_pubmed_id,
+          'type' => 'literal',
+        );
+      }
+    }
+    // DIO.
+    if (!empty($entity->biblio_doi)) {
+      $predicates = $rdf_mappings['node:biblio:biblio_doi']['rdf properties'];
+      foreach ($predicates as $predicate) {
+        $res->index[$entity_uri][$predicate][] = array(
+          'value' => $entity->biblio_doi,
+          'type' => 'literal',
+        );
+      }
+    }
+    // Author list as string.
+    if (!empty($entity->biblio_contributors)) {
+      $author_options = array(
+        'BetweenAuthorsDelimStandard'     =>  ', ',      //4
+        'BetweenAuthorsDelimLastAuthor'   =>  ', ',    //5
+        'AuthorsInitialsDelimFirstAuthor' =>  ' ',      //7
+        'AuthorsInitialsDelimStandard'    =>  ' ',       //8
+        'betweenInitialsDelim'            =>  '',      //9
+        'initialsBeforeAuthorFirstAuthor' =>  FALSE,     //10
+        'initialsBeforeAuthorStandard'    =>  FALSE,      //11
+        'shortenGivenNames'               =>  TRUE,      //12
+        'numberOfAuthorsTriggeringEtAl'   =>  10,        //13
+        'includeNumberOfAuthors'          =>  10,        //14
+        'customStringAfterFirstAuthors'   =>  ', et al.',//15
+        'encodeHTML'                      =>  true
+      );
+      $authors = strip_tags(theme('biblio_format_authors', array(
+        'contributors' => $entity->biblio_contributors,
+        'options' => $author_options,
+        'inline' => $inline,
+      )));
+      $predicates = $rdf_mappings['node:biblio:exframe_author_list']['rdf properties'];
+      foreach ($predicates as $predicate) {
+        $res->index[$entity_uri][$predicate][] = array(
+          'value' => $authors,
+          'type' => 'literal',
+        );
+      }
+    }
+  }
+}
+
+/**
+ * List of generic groups like HSCI which don't grant much access and are not
+ * actual labs.
+ */
+function exframe_generic_gids() {
+  return array(
+    13263, // HSCI Metadata
+  );
+}
+
+/**
+ * Return the group the logged in user belongs to.
+ */
+function exframe_logged_in_user_groups() {
+  // Get groups of the logged in user grouped by entity type.
+  $groups = og_get_entity_groups();
+  // Results are grouped by entity type, so strip that out.
+  if (!empty($groups['node'])) {
+    $groups = $groups['node'];
+    // Some groups like HSCI should be lower priority than the regular groups
+    // for example for the purpose of the "My lab" feature, so bring these
+    // generic groups ids down the list.
+    foreach (exframe_generic_gids() as $gid) {
+      if ($gid_key = array_search($gid, $groups)) {
+        unset($groups[$gid_key]);
+      }
+      array_push($groups, "$gid");
+    }
+    return array_values($groups);
+  }
+  return array();
+}
+
+/**
+ * Return the groups a logged in user and an experiment have in common.
+ *
+ * Returns TRUE is the experiment is public.
+ */
+function exframe_common_groups($experiment) {
+  // If the experiment is public, no need to find the common groups.
+  $wrapper = entity_metadata_wrapper('node', $experiment->nid);
+  $content_access = !empty($wrapper->{OG_CONTENT_ACCESS_FIELD}) ? $wrapper->{OG_CONTENT_ACCESS_FIELD}->value() : OG_CONTENT_ACCESS_DEFAULT;
+  if ($content_access == OG_CONTENT_ACCESS_PUBLIC) {
+    return TRUE;
+  }
+
+  $user_groups = exframe_logged_in_user_groups();
+  // Remove generic groups from the user groups, only lab groups are considered
+  // to access the experiment data.
+  foreach (exframe_generic_gids() as $gid) {
+    if ($gid_key = array_search($gid, $user_groups)) {
+      unset($user_groups[$gid_key]);
+    }
+  }
+  $experiment_groups = og_get_entity_groups('node', $experiment);
+  // Results are grouped by entity type, so strip that out.
+  if (!empty($experiment_groups['node'])) {
+    $experiment_groups = $experiment_groups['node'];
+    return array_intersect($user_groups, $experiment_groups);
+  }
+  return array();
+}
+
+
+/**
+ * Implementation of hook_field_access().
+ */
+function exframe_field_access($op, $field, $entity_type, $entity, $account) {
+  // Not all fields can be hidden using hook_field_access(), for example
+  // the fields implemented using Display Suite have to be hidden during the
+  // rendering. We implement hook_field_access() for the fields that we can
+  // restrict access here anyways in case a view or search_api attempts to
+  // access them at a later stage in the development of exframe.
+  $restricted_fields = array(
+    'field_xf_replicate_file',
+    'field_xf_analysis_description',
+    'field_xf_analysis_file',
+    'field_xf_analysis_file_type',
+    'field_xf_analysis_name',
+  );
+
+
+  if ($op == 'view' && in_array($field['field_name'], $restricted_fields)) {
+    // Identify the experiment that includes the replicate or analysis.
+    // Empty test needed otherwise errors upon saving bioassay to experiment
+    if (empty($entity->hostEntity()->type)) {
+      return;
+    }
+    switch ($entity->hostEntity()->type) {
+      case 'xf_experiment':
+        $experiment = $entity->hostEntity();
+        break;
+      case 'xf_bioassay':
+        // EFQ to find experiment this bioassay belongs to.
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'xf_experiment')
+          ->fieldCondition('field_xf_bioassay', 'target_id', $entity->hostEntity()->nid, '=');
+        $result = $query->execute();
+        if (!empty($result['node'])) {
+          $experiment = node_load(current($result['node'])->nid);
+        }
+        break;
+    }
+
+    // If no experiment was found, it could be that the user does not have
+    // access to the experiment, so this field should not be displayed.
+    if (empty($experiment->nid)) {
+      // Return FALSE to deny access to the field.
+      return FALSE;
+    }
+
+    // If the logged in user does not have any group in common with the
+    // experiment, restrict access to the data of the experiment.
+    if (!exframe_common_groups(node_load($experiment->nid))) {
+      // Return FALSE to deny access to the field.
+      return FALSE;
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_view().
+ */
+function exframe_entity_view($entity, $type, $view_mode, $langcode) {
+  if ($type == 'node' && $entity->type == 'xf_experiment' && !exframe_common_groups(node_load($entity->nid))) {
+    // All the fields are hidden here, though some are also denied access in
+    // exframe_field_access(). Some fields like those from Display Suite
+    // cannot be hidden in hook_field_access().
+    $entity->content['experiment_download'] = array();
+    $entity->content['rtype_data'] = array();
+    $entity->content['field_xf_researcher_analysis'] = array();
+    $entity->content['field_xf_replicate_file'] = array();
+  }
+}
+
+/**
+ * Implements hook_ds_fields_info().
+ *
+ * Display Suite allows to define custom field which can be formatted via code.
+ * This is ideal for the rtype data which comes from custom database queries.
+ * This field can be added to experiments display at the usual location.
+ */
+function exframe_ds_fields_info($entity_type) {
+  $fields['node']['experiment_download'] = array(
+    'title' => t('Download'),
+    'field_type' => DS_FIELD_TYPE_FUNCTION,
+    'function' => '_exframe_experiment_download_render',
+  );
+
+  if (isset($fields[$entity_type])) {
+    return array($entity_type => $fields[$entity_type]);
+  }
+}
+
+/**
+ * Custom output function for rendering the download section.
+ */
+function _exframe_experiment_download_render($field) {
+  $experiment = $field['entity']->nid;
+  $file_url = exframe_get_isatab_file($experiment);
+
+  if ($file_url != NULL) {
+            $filename = basename($file_url);
+            $output = 'Study metadata (ISA-Tab: ' . '<a href="'.$file_url.'">'.$filename.'</a>' . ')';
+    } else {
+            $output = 'Files not yet available.';
+    }
+
+  return $output;
+}
+
+function exframe_get_isatab_file($id) {
+  global $base_url;
+  $output = NULL;
+  $experiment = $id;
+
+  // One new experiment creation, $experiment is a class, not a node id. Causes errors when saving
+  // new experiment if do not verify that $experiment is string.
+  if (!is_string($experiment)) {
+    return;
+  }
+  $results_isa = db_query('SELECT j.status, j.exp_id, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND r.file_type=\'ISA-Tab\'');
+        while($row = $results_isa->fetchAssoc()) {
+            if ($row['status'] == '1') {
+
+                $output = $base_url."/".$row['file_path'];
+                //dsm($output);
+              }
+          }
+  return $output;
+}

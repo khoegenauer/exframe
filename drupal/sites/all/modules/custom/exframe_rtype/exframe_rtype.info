@@ -1,0 +1,4 @@
+name = exframe_rtype
+description = custom code for dealing with rtype tables: run R script and display in experiment page
+core = 7.x
+dependencies[] = exframe

@@ -1,0 +1,16 @@
+dir_rlib	/usr/local/lib/R/site-library
+dir_data	/var/www/example/files
+dir_scripts	/var/www/example/scripts
+dbuser	<mysql username here>
+dbpass	<mysql password here>
+dbname	<db name here>
+dbhost	localhost
+sparql_url	http://site-live.hosting.org/sparql?query=
+site_url	http://site-live.hosting.org
+alias_url	http://example.org
+RDF_reference_file	RDF_Ref.txt
+isa_structure_file	isa_structure.txt
+isa_translation_file	isa_translations.txt
+ontology_reference_file	Ontology_Ref.txt
+drupal_path	sites/default/files
+sparql_key	123

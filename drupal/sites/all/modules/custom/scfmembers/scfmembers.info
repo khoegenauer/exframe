@@ -1,0 +1,4 @@
+name = "SCF Members"
+description = "SCF Members"
+core = "7.x"
+php = "5.2.4"

@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the scfbiblio module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function scfbiblio_schema() {
+  $schema['scfbiblio_pubmed_pending_sync'] = array(
+    'description' => 'Stores biblio pubmed ids whose dates or keywords need to be synced.',
+    'fields' => array(
+      'pmid' => array(
+        'description' => 'The Pubmed ID this record affects.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data_pending' => array(
+        'description' => 'The data/reason why this pubmed node needs to be synced.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'queued' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Time when this node was queued for refresh, 0 if not queued.',
+      ),
+      'checked' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Last time the article was checked on pubmed, as Unix timestamp.',
+      ),
+      'deleted' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'flag for debug purposes. 1 if needs deletion (removed from queue).',
+      ),
+    ),
+    'primary key' => array('pmid', 'data_pending'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Add scfbiblio_pubmed_pending_sync table.
+ */
+function scfbiblio_update_7001() {
+  $schema = scfbiblio_schema();
+  db_create_table('scfbiblio_pubmed_pending_sync', $schema['scfbiblio_pubmed_pending_sync']);
+}

@@ -1,0 +1,63 @@
+<?php
+
+define('SRCDB', 'hsciexpress');
+define('SRC_FILES_PATH', DRUPAL_ROOT . '/../migration/replicate_data_files/');
+
+/**
+ * The content types have been renamed from D6 to D7:
+ * Experiment remains the same
+ * Bioassay_groups become bioassay
+ * Bioassay becomes replicate
+ * biomaterial remains the same
+ * (note that some fields have been also been moved from one content type to
+ * another).
+ */
+
+/*
+ * You must implement hook_migrate_api(), setting the API level to 2, for
+ * your migration classes to be recognized by the Migrate module.
+ */
+function migrate_xf_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}
+
+/**
+ * Retrieve value from a single value CCK field.
+ */
+function migrate_xf_retrieve_cck_single_value($content_type, $field, $vid, $key = '') {
+  $table = '.content_type_' . $content_type;
+  $column = $key ? $field . '_' . $key : $field . '_value';
+  $query = db_select(SRCDB . $table, 'c')
+    ->fields('c', array($column))
+    ->condition('vid', $vid, '=');
+  $results = $query->execute();
+
+  foreach ($results as $row) {
+    return $row->$column;
+  }
+}
+
+/**
+ * Retrieve value from a multiple value CCK field.
+ */
+function migrate_xf_retrieve_cck_multiple_value($content_type, $field, $vid, $key, $sort_delta = TRUE) {
+  $table = '.content_' . $field;
+  $column = $field . '_' . $key;
+  $query = db_select(SRCDB . $table, 'c')
+    ->fields('c', array($column))
+    ->condition('vid', $vid, '=');
+  if ($sort_delta) {
+    $query->orderBy('delta');
+  }
+  $results = $query->execute();
+
+  $return = array();
+  foreach ($results as $row) {
+    $return[] = $row->$column;
+  }
+
+  return $return;
+}

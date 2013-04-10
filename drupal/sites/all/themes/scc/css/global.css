@@ -1,0 +1,110 @@
+/* This file will hold styles that apply site-wide */
+
+/* Resets omega behavior which highlight the table row on hover */
+tr:hover td, tr.even:hover td.active, tr.odd:hover td.active {
+    background: none;
+}
+
+/******************************
+ Global CSS for ALL menu types
+******************************/
+/* We added these for menus */
+ul.nice-menu,
+ul.nice-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+
+ul.nice-menu li {
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  float: left; /* LTR */
+}
+
+ul.nice-menu a {
+  padding: 0.3em 30px 0.3em 30px;
+  background-color: #fff;
+  font-family: Helvetica;
+  font-size: 12px;
+  text-decoration: none;
+  color: #4C4646;
+
+}
+
+ul.nice-menu ul {
+  top: 1.8em;
+  left: -1px; /* LTR */
+  border: 0;
+  margin-right: 0; /* LTR */
+  background-color: #004e73;
+}
+
+ul.nice-menu ul li {
+  width: 12.5em;
+}
+
+
+.breadcrumb a {
+  text-decoration: none;
+}
+
+/* Styles for the experiment details page*/
+h1 {
+font-family: Helvetica, Arial, Verdana;
+font-size: 25px;
+}
+
+h2.node-title {
+  font-family: Helvetica, Arial, Verdana;
+  font-size: 15px;
+}
+
+a:link, a:visited {
+  text-decoration: none;
+}
+
+.field-name-field-xf-bioassay {
+  padding-top: 5px;
+}
+
+.field .field-label {
+  /*text-transform: uppercase;*/
+  font-size: 12px;
+  font-weight: 600;
+  color: #625D5D;
+}
+
+.field-label-inline,
+.field-label-above {
+  margin-top: 7px;
+}
+
+.fieldset-legend {
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 7px;
+  margin-bottom: 7px;
+}
+
+.field-group-fieldset {
+  margin-top: 7px;
+}
+
+fieldset.collapsible .field {
+  padding-left: 15px;
+}
+
+
+.node-xf-bioassay {
+  border-bottom: 1px solid #BBB;
+  margin-bottom: 7px;
+  padding-bottom: 5px;
+}
+
+
+

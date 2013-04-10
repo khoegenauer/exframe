@@ -1,0 +1,761 @@
+/* This file will hold the main styles for your website. */
+
+body {
+  background-image: url('../images/background.jpg');
+  background-repeat: repeat-x;
+  background-color: #b7c5cf;
+  background-position:center top;
+}
+
+body, p, h1, h2, h3, h4, h5, h6 {
+  font-family: "Helvetica Neue", Helvetica, Arial, Verdana, sans-serif;
+  color: black;
+}
+
+a:link {
+	font-family: "Helvetica Neue", Helvetica, Arial, Verdana, sans-serif;
+	color: #0077c9;
+	letter-spacing: 0.03em;
+}
+
+#zone-content,
+#zone-menu,
+#zone-header,
+#zone-preface
+{
+  padding: 5px  10px;
+  background-color: #fff;
+}
+
+#zone-branding {
+	padding-top: 20px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+	background-color: #fff;
+}
+
+#zone-content {
+	margin-bottom: 50px;
+	padding-bottom: 20px;
+	border-bottom-right-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+
+.front #region-header-first {
+	background-image: url('../images/main-banner.jpg');
+  background-position:center top;
+	height: 120px;
+	border-radius: 10px;
+	margin-top: 15px;
+	margin-bottom: 5px;
+}
+
+
+
+/* Header */
+#region-branding {
+	width: 300px;
+}
+
+#region-menu {
+	width: 620px;
+}
+
+#region-user-second {
+	width: 620px;
+}
+.region-user-second {
+  float: right;
+  display: inline;
+}
+
+/* hide "current search" block title */
+#block-current-search-standard h2.block-title {
+  display: none;
+}
+
+#block-search-api-page-exframe-search-page h2.block-title {
+  display: none;
+}
+#block-search-api-page-exframe-search-page {
+	float: right;
+	display: inline;
+}
+#block-search-api-page-exframe-search-page .form-item {
+	display: inline;
+}
+.page-search .region-content .tabs.primary {
+  display: none;
+}
+
+/* Hide search form on all experiments page */
+.page-search-all-experiments #block-system-main #search-api-page-search-form,
+.page-search-all-experiments #block-system-main .search-performance,
+.page-search-all-experiments #block-system-main h2 {
+  display: none;
+}
+
+#block-scfmembers-scfmembers-user-top-menu {
+	float: right;
+	display: inline;
+}
+
+#block-scfmembers-scfmembers-user-top-menu h2.block-title {
+	display: none;
+}
+
+#scfmembers_user_menu li{
+	display: inline;
+	text-transform: uppercase;
+	color: #0077c9;
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.03em;
+  border-right: 1px solid #CCCCCC;
+  padding: 5px 10px 5px 10px;
+  margin: 0;
+}
+
+#scfmembers_user_menu li.last{
+	border: none;
+}
+
+
+
+/* Menus */
+.region-menu {
+  margin-top:30px;
+}
+
+.zone-content {
+  border-top: 1px solid #CCCCCC;
+}
+
+.zone-header {
+	border-top: 1px solid #CCCCCC;
+}
+ul.nice-menu, ul.nice-menu ul{
+  float: right;
+  display: inline;
+}
+
+ul.nice-menu li.last {
+  border-right: 0;
+}
+
+ul.nice-menu a {
+  padding: 0px 25px 0px 25px;
+  font-family: Helvetica,  Arial, Verdana;;
+  font-size: 16px;
+  color: #666666;
+}
+
+ul.nice-menu-down li a:hover {
+  color: #219abd;
+}
+
+ul.nice-menu li.active-trail a{
+  color: #FFFFFF;
+  background-color: #219abd;
+}
+
+ul.nice-menu .menuparent a {
+  padding-right: 25px;
+}
+
+ul.nice-menu li.menuparent ul {
+	margin-top: 10px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+ul.nice-menu li.menuparent ul a {
+ 	background-color: #219abd;
+ 	color: #FFFFFF;
+ 	padding-top: 5px;
+
+}
+
+/*
+ul.nice-menu li.menuparent ul li.last a{
+	border-bottom-right-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+*/
+
+ul.nice-menu  li.menuparent ul li {
+ border-right: 1px solid #219abd;
+}
+
+
+
+/* Front page styles*/
+.button a{
+	padding: 5px;
+	margin: 0;
+	font-weight: bold;
+}
+
+.button a:after {
+	content: "\00bb \00a0";
+	padding-right: 10px;
+	padding-left: 4px;
+}
+
+.front .zone-preface {
+	background-image: url('../images/dna-background.jpg');
+  background-position: left;
+  padding-bottom: 10px !important;
+}
+
+#block-scc-config-scc-config-becomeamem h2.block-title {
+	display: none;
+}
+
+#block-scc-config-scc-config-search h2.block-title,
+#block-scc-config-scc-config-browse h2.block-title,
+#block-scc-config-scc-config-code h2.block-title,
+#block-scc-config-scc-config-analyze h2.block-title,
+#block-scc-config-scc-config-visualize h2.block-title
+{
+  border-radius: 5px;
+  font-family: Helvetica,  Arial, Verdana;;
+  font-size: 18px;
+  color: #FFFFFF;
+  padding: 3px 0 2px 10px;
+  font-weight: normal;
+  letter-spacing: 0.03em;
+  margin: 0px;
+
+}
+
+#block-scc-config-scc-config-search a.block-title-link,
+#block-scc-config-scc-config-browse a.block-title-link,
+#block-scc-config-scc-config-code a.block-title-link,
+#block-scc-config-scc-config-analyze a.block-title-link,
+#block-scc-config-scc-config-visualize a.block-title-link
+{
+  color: #FFFFFF;
+  display: block;
+}
+
+#block-scc-config-scc-config-search .field-name-body,
+#block-scc-config-scc-config-browse .field-name-body,
+#block-scc-config-scc-config-code .field-name-body,
+#block-scc-config-scc-config-analyze .field-name-body,
+#block-scc-config-scc-config-visualize .field-name-body {
+	padding: 5px;
+}
+
+#block-scc-config-scc-config-search .field-name-body p,
+#block-scc-config-scc-config-browse .field-name-body p,
+#block-scc-config-scc-config-code .field-name-body p,
+#block-scc-config-scc-config-analyze .field-name-body p,
+#block-scc-config-scc-config-visualize .field-name-body p {
+	padding: 0px;
+	margin: 5px;
+}
+
+#block-scc-config-scc-config-analyze h2.block-title {
+	background-color: #ea5363;
+}
+
+#block-scc-config-scc-config-visualize h2.block-title {
+	background-color: #ec6e53;
+}
+
+#block-scc-config-scc-config-code h2.block-title {
+	background-color: #9281bf;
+}
+
+#block-scc-config-scc-config-search h2.block-title {
+	background-color: #6dceb2;
+}
+
+#block-scc-config-scc-config-browse h2.block-title {
+	background-color: #29c7e8;
+}
+
+#block-scc-config-scc-config-search,
+#block-scc-config-scc-config-browse {
+	margin-left: 60px;
+	margin-top: 5px;
+}
+
+#block-scc-config-scc-config-analyze {
+	/* margin-top: 13px; */
+	margin-top: 42px;
+	margin-left: 30px;
+	margin-right: 30px;
+}
+
+#block-scc-config-scc-config-code,
+#block-scc-config-scc-config-visualize {
+	margin-top: 5px;
+	margin-right: 60px;
+}
+
+#block-scc-config-scc-config-becomeamem {
+	/* margin-top: 0px; */
+	margin-top: 5px;
+	margin-left: 15px;
+	margin-right: 30px;
+}
+
+.block-scc-config-scc-config-becomeamem .field-name-body a {
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 18px;
+  font-weight: normal;
+  color: #FFFFFF;
+  padding: 5px 20px 0 20px;
+} 
+
+
+
+/* Front page bottom blocks */
+.front .section-content .container-12 .grid-3 {
+    width: 295px;
+    margin: 0px;
+}
+
+.front .section-content .container-12 .grid-6  {
+ 	  width: 330px;
+ 	  margin-left: 20px;
+ 	  margin-right: 20px;
+ 	  margin-bottom: 30px;
+}
+
+#block-scc-config-scc-config-whoweare {
+	padding-left: 10px;
+}
+
+#block-scc-config-scc-config-whoweare img {
+	margin-bottom: 20px;
+}
+
+#block-views-xf-projects-block {
+	margin-top: -20px;
+	border-right: 1px solid #CCCCCC;
+	border-left: 1px solid #CCCCCC;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.front .section-content h2.block-title  {
+	color: #0077c9;
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 10px;
+
+}
+
+.section-content .views-field-title a {
+	color: #0077c9;
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.section-content .views-row {
+	padding-bottom: 15px;
+}
+
+.front .view-xf-projects .field-content p {
+	margin-bottom: 0px;
+}
+
+.more-link {
+  font-weight: bold;
+  float: left;
+}
+
+.more-link a:after {
+	content: "\00bb \00a0";
+	padding-right: 10px;
+}
+
+
+
+/* Experiment details page styles */
+.node-xf-experiment h2.node-title {
+  font-family: Helvetica, Arial, Verdana;
+  font-size: 13px;
+  font-weight: bold;
+  color: #0077c9;
+}
+
+
+.node-xf-experiment .field-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  width: 20%;
+  float: left;
+}
+
+
+.node-xf-experiment .field-items {
+  font-family: Helvetica, Arial, Verdana;
+  font-size: 14px;
+  color: #333333;
+  width: 80%;
+  float: right;
+}
+
+
+.node-xf-experiment .field-name-field-xf-biblio-citation .field-label,
+.node-xf-experiment .field-name-field-xf-related-experiment .field-label {
+  float: none;
+  padding-top: 7px;
+}
+
+
+.node-xf-experiment .field-name-field-xf-replicate .field-items,
+.node-xf-experiment .field-name-field-xf-biblio-citation .field-items,
+.node-xf-experiment .field-name-rtype-data .field-items,
+.node-xf-experiment .field-name-field-xf-related-experiment .field-items
+{
+  float: none;
+  width: 100%;
+}
+
+/* Related Experiments Theming*/
+.node-xf-experiment .field-name-field-xf-related-experiment .field-items {
+  padding-top: 7px;
+}
+
+.node-xf-experiment .field-name-field-xf-related-experiment .field-items .item-list ul {
+  padding: 0;
+  margin: 0;
+}
+
+.node-xf-experiment .field-name-field-xf-related-experiment .field-items .item-list ul li {
+  padding: 0;
+  margin: 0;
+}
+
+.node-xf-experiment .field-name-field-xf-summary .field-items,
+.node-xf-experiment .field-name-field-xf-library-const-protocol .field-items {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+/* spacing between multiple external links */
+.node-xf-experiment .field-name-field-xf-external-reference .field-items .field-item.odd {
+  padding-left: 1.5em;
+  padding-right: 1.5em;
+}
+
+.node-xf-experiment .field-name-field-xf-contact {
+  background-color: #eef0f4;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  padding: 10px 10px 0 10px;
+  margin: 15px 0 0 0;
+}
+
+.node-xf-experiment .field-name-field-xf-curator {
+  background-color: #eef0f4;
+  padding: 0 10px 0 10px;
+  margin: 0;
+}
+
+.node-xf-experiment .field-name-post-date {
+  background-color: #eef0f4;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  padding: 0 10px 10px 10px;
+  margin: 0 0 20px 0;
+}
+
+.node .field-name-experiment-download {
+  background-color: #eef0f4;
+  border-radius: 5px;
+  padding: 0 10px 10px 10px;
+  margin: 20px 0 20px 0;
+  padding: 10px;
+}
+/* undo the generic tabular styles of the other fields */
+.node .field-name-experiment-download .field-label,
+.node .field-name-experiment-download .field-items {
+  float: none;
+  width: 100%;
+}
+
+
+.node-xf-experiment .field-name-field-xf-researcher-analysis > .field-items {
+  width: 100%;
+}
+
+
+/* Hide some publishing options Emily December 18 2012*/
+div.form-item.form-type-checkbox.form-item-promote,
+div.form-item.form-type-checkbox.form-item-sticky{
+  display: none;
+}
+
+/* Styles for tabs and table  */
+
+.node-xf-experiment .horizontal-tabs ul.horizontal-tabs-list {
+  background-color: #FFFFFF;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.node-xf-experiment .horizontal-tabs ul.horizontal-tabs-list li {
+  background-color: #41c5e8;
+  margin-right: 5px;
+  padding: 1px 140px 1px 5px;
+  border: none;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.node-xf-experiment .horizontal-tabs ul.horizontal-tabs-list li.selected {
+  background-color: #6dceb2;
+}
+
+.node-xf-experiment .horizontal-tabs ul.horizontal-tabs-list li.last {
+  margin-right: 0;
+  padding-right: 141px;
+}
+
+.node-xf-experiment .horizontal-tabs ul.horizontal-tabs-list li a,
+.node-xf-experiment .horizontal-tabs ul.horizontal-tabs-list li.selected strong
+{
+  color: #FFFFFF;
+}
+
+
+#exframe-bioassay-table {
+  border: 0;
+  float: none;
+  width: 100%;
+}
+
+
+div.horizontal-tabs {
+  border-top: 0;
+  border-top-left-radius: 38px;
+  border-top-right-radius: 10px 50px;
+}
+
+.horizontal-tabs fieldset.horizontal-tabs-pane {
+  padding: 0px;
+}
+
+
+.exframe-bioassay-description {
+  font-size: 13px;
+  background-color: #eef0f4;
+  padding: 10px;
+  margin-top: -10px;
+}
+
+thead th {
+  background-color: #eef0f4;
+  color: #003366;
+  font-weight: bold;
+  /*border-right: 1px solid #CCCCCC; */
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+/* Styles for Analyze Button */
+.exframe-button input {
+  background-color: #0077c9;
+  background-image: none;
+  border-radius: 20px;
+  border-color: #0077c9;
+  text-shadow: none;
+  float: right;
+  margin-right: 20px;
+  padding: 2px 10px;
+  color: #FFFFFF;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.exframe-analyze-description {
+	float: left;
+	padding-left: 10px;
+}
+
+
+/* Styles for the biomaterials details page*/
+.node-xf-biomaterial .field-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  width: 15%;
+  float: left;
+}
+
+.node-xf-biomaterial .field-items {
+  font-family: Helvetica, Arial, Verdana;
+  font-size: 14px;
+  color: #333333;
+  width: 85%;
+  float: right;
+}
+
+.node-xf-biomaterial .field-items .field-item.odd {
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+.biblio-title {
+	font-weight: bold;
+	padding-top: 10px;
+}
+
+/* Statistics Page*/
+.context-statistics .container-12 .grid-4 {
+    width: 460px;
+}
+
+.context-statistics .zone-preface {
+	background-image: url('../images/dna-background.jpg');
+  background-position:center top;
+}
+
+.context-statistics .breadcrumb,
+.context-statistics  #page-title {
+	display: none;
+}
+
+#block-views-xf-experiment-newest-block {
+	background-color: #EEF0F4;
+	border-radius: 10px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+#block-views-xf-experiment-newest-block h2.block-title{
+	color: #003366;
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.context-statistics .section-content .views-field-title a {
+	color: #0077c9;
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 13px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.context-statistics .section-content .views-field-title {
+	margin-top: 10px;
+}
+
+#block-views-xf-bioassay-count-block .view-content{
+	/* to add up to 940px */
+	width:300px;
+	margin-left: 320px;
+	margin-right:320px;
+	margin-top: 20px;
+	padding: 10px;
+	background-color: #6dceb2;
+	border-radius: 5px;
+	color: #FFFFFF;
+	font-size: 14px;
+}
+
+#block-views-xf-bioassay-count-block h2.block-title{
+	display: none;
+}
+
+#block-views-xf-bioassay-count-block .view-footer p{
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 0px;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.zone-preface h2.block-title  {
+	color: #0077c9;
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.exframe-taxonomy-tree li {
+	padding: 2px, 0px, 2px, 0px;
+	border-bottom: 1px solid #CCCCCC;
+	color: #333333;
+	font-size: 12px;
+}
+
+.exframe-taxonomy-tree li.last {
+	border: none;
+}
+
+
+.exframe-taxonomy-tree .views-field-nid {
+	float: right;
+}
+
+
+/* My Labs */
+.view-exframe-lab-experiments .node-published header,
+.view-exframe-lab-experiments .node-links{
+  display: none;
+}
+
+.view-exframe-lab-experiments .view-header {
+	color: #003366;
+	font-family: Helvetica,  Arial, Verdana;;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+
+/* Styles for the user profiles page*/
+.profile .field-name-og-user-node,
+.profile .field-name-field-xfp-minitial,
+.profile h3,
+.profile .user-profile-item
+{
+  display: none;
+}
+
+.profile .user-picture {
+  float: none;
+}
+
+.profile .field-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  width: 15%;
+  float: left;
+}
+
+.profile .field-items {
+  font-family: Helvetica, Arial, Verdana;
+  font-size: 14px;
+  color: #333333;
+  width: 85%;
+  float: right;
+}
+
+
+/* Styles for pages */
+.node-xf-exportable-content .submitted,
+.node-xf-exportable-content .field-name-field-xf-content-name{
+	display: none;
+}

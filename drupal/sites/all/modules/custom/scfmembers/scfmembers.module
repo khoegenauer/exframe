@@ -1,0 +1,141 @@
+<?php
+/**
+ * @file
+ * Code for the SCF Members.
+ */
+
+/**
+ * Implements hook_block_info().
+ */
+function scfmembers_block_info() {
+  $block = array();
+//   $blocks['scfmembers_account_management'] = array(
+//     'info' => t('scfmembers: Personal account management'),
+//     'cache' => DRUPAL_NO_CACHE,
+//   );
+  $blocks['scfmembers_user_top_menu'] = array(
+    'info' => t('scfmembers: User top menu'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  // Site builders might want to add another block for membership benefits
+  // using node_block. We code this block here so we have better control over
+  // its title which has to include the current user first name.
+//   $blocks['scfmembers_user_welcome'] = array(
+//     'info' => t('scfmembers: User welcome'),
+//     'cache' => DRUPAL_NO_CACHE,
+//   );
+//   $blocks['scfmembers_most_active'] = array(
+//     'info' => t('scfmembers: Most Active'),
+//     'cache' => DRUPAL_NO_CACHE,
+//   );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function scfmembers_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'scfmembers_account_management':
+      $block['subject'] = t('Account Management');
+      $block['content'] = scfmembers_account_management_block_content();
+      break;
+    case 'scfmembers_user_top_menu':
+      $block['subject'] = t('User Top Menu');
+      $block['content'] = scfmembers_user_top_menu_block_content();
+      break;
+    case 'scfmembers_user_welcome':
+      $block['subject'] = t('Welcome') . ' ' . _scfmembers_current_user_full_name();
+      $block['content'] = scfmembers_user_welcome_block_content();
+      break;
+    case 'scfmembers_most_active':
+      $block['subject'] = t('Most Active Commentators');
+      $block['content'] = scfmembers_most_active_block_content();
+      break;
+  }
+  return $block;
+}
+
+function scfmembers_account_management_block_content() {
+  global $user;
+
+  // Do not display this block if the user is not logged in.
+  if (!user_is_logged_in()) {
+    return;
+  }
+
+  $links = array();
+  $links[] = l(t('Edit Profile'), 'user/' . $user->uid . '/edit/scfmembers_profile');
+  $links[] = l(t('Upload publications'), 'user/' . $user->uid . '/biblio_import');
+  $links[] = l(t('My Favorites'), 'user/' . $user->uid . '/bookmarks');
+  $links[] = l(t('Subscriptions'), 'user/' . $user->uid . '/subscriptions');
+  $links[] = l(t('Account Settings'), 'user/' . $user->uid . '/edit');
+  return theme('item_list', array('items' => $links, 'attributes' => array('class' => 'scfmembers_account_management')));
+}
+
+/**
+ * Renders content for the scfmembers_user_top_menu block
+ */
+function scfmembers_user_top_menu_block_content() {
+  global $user;
+  $account = user_load($user->uid);
+  $links = array();
+  if(user_is_logged_in()) {
+    $username =  check_plain(_scfmembers_current_user_full_name());
+    $links[] = l(t('Welcome') . ', ' . $username, 'user');
+    $links[] = l(t('Log Out'), 'user/logout');
+    // $links[] = l(t('Invite Others'), 'invite');
+    // $links[] = l(t('My Profile'), 'user/' . $user->uid);
+    // $links[] = l(t('My Favorites'), 'user/' . $user->uid . '/bookmarks');
+    $user_groups = exframe_logged_in_user_groups();
+    // Remove the HSCI & HSCI Metadata group to get a proper group as "My lab".
+    // HSCI gid is 26. HSCI Metadata group is 13262.
+    $gid_key = array_search(26, $user_groups);
+    if ($gid_key !== FALSE) {
+      unset($user_groups[$gid_key]);
+    }
+    $gid_key = array_search(13263, $user_groups);
+    if ($gid_key !== FALSE) {
+      unset($user_groups[$gid_key]);
+    }
+    if (!empty($user_groups)) {
+      $links[] = l(t('My Lab'), 'lab/' . current($user_groups));
+    }
+    $links[] = l(t('Contact us'), 'contact');
+  }
+  else {
+    // $links[] = t('Welcome') . ', ' . 'guest';
+    $links[] = l(t('Log In'), 'user/login');
+    $links[] = l(t('Join'), 'user/register');
+    $links[] = l(t('Contact us'), 'contact');
+  }
+
+  return theme('item_list', array('items' => $links, 'attributes' => array('id' => 'scfmembers_user_menu', 'class' => 'menu')));
+}
+
+/**
+ * Returns content for the user welcome block.
+ */
+function scfmembers_user_welcome_block_content() {
+  $output = '';
+  if(user_is_logged_in()) {
+    $output .= '<p>Spread the word about the Multiple Sclerosis Discovery Forum.</p>';
+    $output .= '<p>&nbsp;</p><p><span class="fake-button">' . l(t('Invite Others To Join'), 'invite') . '</span></p>';
+  }
+  return $output;
+}
+
+/**
+ * Helper function for getting the user first name.
+ */
+function _scfmembers_current_user_full_name() {
+  global $user;
+  $account = profile2_load_by_user($user, 'xf_profile');
+  if ($account) {
+    $firstname_item = field_get_items('profile2', $account, 'field_xfp_firstname');
+    $lastname_item = field_get_items('profile2', $account, 'field_xfp_lastname');
+    return $firstname_item[0]['safe_value'] . ' ' . $lastname_item[0]['safe_value'];
+  }
+}
+

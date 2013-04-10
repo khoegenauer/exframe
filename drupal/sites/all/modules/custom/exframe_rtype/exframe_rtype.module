@@ -1,0 +1,286 @@
+<?php
+/**
+ * @file
+ * Code for the exframe_rtype.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function exframe_rtype_menu() {
+  $items['node/%node/rtype_process'] = array(
+    'title' => 'Process',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('rtype_process_form', 1),
+    'access callback' => 'exframe_rtype_process_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Form builder.
+ */
+function rtype_process_form($form, &$form_state, $node) {
+  $form = array();
+
+  // Place experiment node in form values for later use in submit handler.
+  $form['#experiment'] = $node;
+
+  $form['description'] = array(
+    '#markup' => '<p>Administrator use only. Buttons do not delete existing jobs or files; they must be removed manually.</p>',
+  );
+  // Add the buttons.
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create ISA-Tab'),
+    '#weight' => 5,
+    '#submit' => array('rtype_process_isa_form_submit'),
+  );
+  $form['actions']['preview'] = array(
+    '#type' => 'submit',
+    '#value' => t('Process Microarray'),
+    '#weight' => 10,
+    '#submit' => array('rtype_process_microarray_form_submit'),
+  );
+  $form['actions']['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create GEO Submission'),
+    '#weight' => 20,
+    '#submit' => array('rtype_process_geo_form_submit'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete ISA-Tab'),
+    '#weight' => 30,
+    '#submit' => array('rtype_process_delete_isa_form_submit'),
+  );
+  $form['actions']['delete'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete Microarray'),
+    '#weight' => 40,
+    '#submit' => array('rtype_process_delete_microarray_form_submit'),
+  );
+  return $form;
+}
+
+function rtype_process_isa_form_submit($form, &$form_state) {
+  // Execute your mighty R script here.
+  // The experiment node is available in $form['#experiment'] if you need it.
+
+  //Get the experiment nid
+  $exp_nid = $form['#experiment']->nid;
+  
+  //Must insert a new job into rtype_jobs table
+  $exp_time = format_date(REQUEST_TIME, $type = 'medium', $format = 'Y-m-d H:i:s', $timezone = NULL, $langcode = NULL);
+
+  $job_id = db_insert('rtype_jobs') // Table name no longer needs {}
+->fields(array(
+  'exp_id' => $exp_nid,
+  'job_type' => 10,
+  'status' => 0,
+  'time_submitted' => $exp_time,
+))
+->execute();
+
+  $drupal_root = getcwd();
+  $project_root = dirname($drupal_root);
+  
+  // test script is <path>/scripts/test_call.R 
+  $exec_command = "R CMD BATCH --no-restore --no-save \"--args " .$exp_nid. " " .$job_id. " " .$project_root. "/secure/settings.txt\" " .$project_root. "/scripts/createISA.R " .$drupal_root. "/sites/default/files/logs/isa_" .$job_id. "_" .$exp_nid. ".txt";
+  
+  //dsm($job_id);
+  //dsm($drupal_root);          // --> /var/www/sccr_project/drupal
+  //dsm($project_root);         // --> /var/www/sccr_project
+  dsm($exec_command);
+  $output = exec($exec_command);
+  if ($output !== NULL) {
+    drupal_set_message('The ISA-Tab R script was executed.');
+  }
+  else {
+    drupal_set_message('Error during ISA-Tab R script execution.', 'error');
+  }
+}
+
+function rtype_process_microarray_form_submit($form, &$form_state) {
+  // Execute your mighty R script here.
+  // The experiment node is available in $form['#experiment'] if you need it.
+
+  //Get the experiment nid
+  $exp_nid = $form['#experiment']->nid;
+  
+  //Must insert a new job into rtype_jobs table
+  $exp_time = format_date(REQUEST_TIME, $type = 'medium', $format = 'Y-m-d H:i:s', $timezone = NULL, $langcode = NULL);
+
+  $job_id = db_insert('rtype_jobs') // Table name no longer needs {}
+->fields(array(
+  'exp_id' => $exp_nid,
+  'job_type' => 1,
+  'status' => 0,
+  'time_submitted' => $exp_time,
+))
+->execute();
+
+  $drupal_root = getcwd();
+  $project_root = dirname($drupal_root);
+  
+  // test script is <path>/scripts/test_call.R 
+  $exec_command = "R CMD BATCH --no-restore --no-save \"--args " .$exp_nid. " " .$job_id. " " .$project_root. "/secure/settings.txt\" " .$project_root. "/scripts/processMicroarray.R " .$drupal_root. "/sites/default/files/logs/microarray_" .$job_id. "_" .$exp_nid. ".txt";
+  
+  //dsm($job_id);
+  //dsm($drupal_root);          // --> /var/www/sccr_project/drupal
+  //dsm($project_root);         // --> /var/www/sccr_project
+  dsm($exec_command);
+  $output = exec($exec_command);
+  if ($output !== NULL) {
+    drupal_set_message('The microarray processing R script was executed.');
+  }
+  else {
+    drupal_set_message('Error during microarray processing R script execution.', 'error');
+  }
+}
+
+
+function rtype_process_geo_form_submit($form, &$form_state) {
+  // Execute your mighty R script here.
+  // The experiment node is available in $form['#experiment'] if you need it.
+  //Get the experiment nid
+  $exp_nid = $form['#experiment']->nid;
+
+}
+
+function rtype_process_delete_isa_form_submit($form, &$form_state) {
+  // Execute your mighty R script here.
+  // The experiment node is available in $form['#experiment'] if you need it.
+  //Get the experiment nid
+  $exp_nid = $form['#experiment']->nid;
+
+}
+
+function rtype_process_delete_microarray_form_submit($form, &$form_state) {
+  // Execute your mighty R script here.
+  // The experiment node is available in $form['#experiment'] if you need it.
+  //Get the experiment nid
+  $exp_nid = $form['#experiment']->nid;
+
+}
+
+
+
+
+
+
+
+/**
+ * Access function to only display the process tab on experiment nodes.
+ */
+function exframe_rtype_process_access($node) {
+  // only uid 1 gets access to the process tab.
+  return user_access(NULL);
+}
+
+/**
+ * Implements hook_ds_fields_info().
+ *
+ * Display Suite allows to define custom field which can be formatted via code.
+ * This is ideal for the rtype data which comes from custom database queries.
+ * This field can be added to experiments display at the usual location.
+ */
+function exframe_rtype_ds_fields_info($entity_type) {
+  // rtype data.
+  $fields['node']['rtype_data'] = array(
+    'title' => t('rtype data'),
+    'field_type' => DS_FIELD_TYPE_FUNCTION,
+    'function' => '_exframe_rtype_data_render',
+  );
+
+  if (isset($fields[$entity_type])) {
+    return array($entity_type => $fields[$entity_type]);
+  }
+}
+
+/**
+ * Custom output function for rendering the rtype data displayed on an
+ * experiment page.
+ */
+function _exframe_rtype_data_render($field) {
+  $output = '';
+  // Description.
+
+  //dsm($field);
+  $experiment = $field['entity']->nid;
+  $measurement_type =  NULL;
+  if (!empty($field['entity']->field_xf_bioassay[LANGUAGE_NONE][0]['entity'])) {
+    $measurement_type = $field['entity']->field_xf_bioassay[LANGUAGE_NONE][0]['entity']->field_xf_measurement_type[LANGUAGE_NONE][0]['tid'];
+  }
+  //dsm($measurement_type);
+ switch ($measurement_type) {
+  case '239':
+
+    // Fetch Microarray GCT files
+    $results_gct = db_query('SELECT j.status, j.exp_id, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND j.job_type = 1 AND r.file_type=\'GCT\'');
+      while($row = $results_gct->fetchAssoc()) {
+        if ($row['status'] == '1') {
+            $filename = basename($row['file_path']);
+            $result = '<a href="'.base_path().$row['file_path'].'">'.$filename.'</a> ';
+          }else{
+            $result = 'Processing in progress...';
+          }
+
+          $gct_files[] = array(
+            $result,
+          );
+      }
+      if(!empty($gct_files)){
+        $header = array('Expression Matrix');
+        $output .= '<p>These are the gene expression matrix file(s):</p>';
+        $output .= theme('table', array('header' => $header, 'rows' => $gct_files));
+      } else {
+        $output .= t('<p>No expression matrix files are available for this experiment.</p>');
+      }
+
+    //Fetch Microarray Group Comparisons
+    $results = db_query('SELECT j.exp_id, j.job_id, r.rf_id, a.rfd_id, j.status, a.baseline_id, a.experimental_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_fc_definition a ON j.job_id = a.job_id LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND j.job_type = 2');
+      while($row = $results->fetchAssoc()) {
+          $baseline = node_load($row['baseline_id']);
+          $experimental = node_load($row['experimental_id']);
+
+
+        //if(access_exp_group_member($experiment)){
+          if (!empty($row['status'])) {
+            $result = '<a href="'.base_path().$row['file_path'].'">Download Result</a> ';
+          }else{
+            $result = 'Processing in progress...';
+          }
+        //}
+        //if(access_exp_owner($row['exp_id'])){
+          //$delete = l(t('Delete'), 'exp/'.$row['exp_id'].'/comparegroup/delete/'.$row['rfd_id'], array('query' => drupal_get_destination()));
+        //}else{
+          //$delete = 'None';
+        //}
+
+        $group_comp_files[] = array(
+            $experimental->title,
+            $baseline->title,
+            $result,
+            //$delete,
+          );
+
+      }
+    if(!empty($group_comp_files)){
+      // 'Action'
+      $header = array('Case', 'Control', 'Result');
+      $output .= '<p>These are the pre-processed group comparisons:</p>';
+      $output .= theme('table', array('header' => $header, 'rows' => $group_comp_files));
+    } else {
+      $output .= t('<p>No group comparisons are available for this experiment.</p>');
+    }
+    return $output;
+    break;
+  default:
+    $output .= t('<p>No preprocessed analysis available.</p>');
+    return $output;
+  }
+}

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Exframe profile feature.
+ */
+
+include_once 'exframe_profile.features.inc';

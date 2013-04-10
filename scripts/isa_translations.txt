@@ -1,0 +1,10 @@
+database_entry	isa_measurement_type	mt_oid	mt_ont	isa_technology_type	tt_oid	tt_ont
+DNA Methylation Profiling (Bisulfite-Seq)	DNA methylation profiling	0000634	OBI	nucleotide sequencing		
+DNA Methylation Profiling (MeDIP-Seq)	DNA methylation profiling	0000634	OBI	nucleotide sequencing		
+Histone Modification (ChIP-Seq)	histone modification profiling			nucleotide sequencing		
+Protein-RNA Binding (RIP-Seq)				nucleotide sequencing		
+Transcription Factor Binding (ChIP-Seq)	transcription factor binding site identification			nucleotide sequencing		
+Transcription Profiling (Microarray)	transcription profiling	0000424	OBI	DNA microarray	400148	OBI
+Transcription Profiling (RNA-Seq)	transcription profiling	0000424	OBI	nucleotide sequencing		
+TRAP Translational Profiling	transcription profiling	0000424	OBI	DNA microarray	400148	OBI
+Variations						

@@ -1,0 +1,32 @@
+<?php
+/**
+ * @file
+ * Code for the exframe_search feature.
+ */
+
+include_once 'exframe_search.features.inc';
+
+function exframe_search_block_view_alter(&$data, $block) {
+  // Context cannot override the subject of a block, so we do it manually here.
+  // @todo find a way to store this with block settings in context.
+  $replacements = array(
+    'Filter by bioassays » replicates » biomaterial(s) » organism:' => 'Organism',
+    'Filter by bioassays » replicates » biomaterial(s) » disease state:' => 'Disease',
+    'Filter by bioassays » replicates » biomaterial(s) » cell type:' => 'Cell Type',
+    'Filter by bioassays » measurement type:' => 'Assay Type',
+    'Filter by contact(s):' => 'Researcher',
+  );
+  if ($block->module == 'facetapi') {
+    $data['subject'] = strtr($data['subject'], $replacements);
+  }
+}
+
+/**
+ * Implements hook_search_api_facetapi_keys_alter().
+ */
+function exframe_search_search_api_facetapi_keys_alter(&$keys, $query) {
+  // Hide the [all items] key from display.
+  if ($keys == '[' . t('all items') . ']') {
+    $keys = '';
+  }
+}

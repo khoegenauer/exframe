@@ -1,0 +1,16 @@
+ont_short_name	ont_long_name	ont_version
+BTO	BRENDA tissue/enzyme source	12/20/2012
+CHEBI	Chemical entities of biological interest	99 (01/09/2013)
+CL	Cell type	2011-11-09
+EFO	Experimental Factor Ontology	2.32 (1/15/2013)
+FMA	Foundational Model of Anatomy	3.1 (03/03/2010)
+ICD10	ICD10	01/01/1998
+MA	Mouse adult gross anatomy	07/22/2011
+NCIt	NCI Thesaurus	12.04e (04/30/2012)
+NCBITaxon	NCBI organismal classification	1.2 (12/12/2011)
+OBI	Ontology for Biomedical Investigations	2012-07-01
+PATO	Phenotypic quality	01/09/2013
+PR	PRotein Ontology	31.0 (01/15/2013)
+SO	Sequence types and features	11/01/2012
+UO	Units of measurement	08/30/2012
+ZFA	Zebrafish anatomy and development	12/07/2012

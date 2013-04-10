@@ -1,0 +1,26 @@
+/* default state is expanded */
+.exframe-bioassay-summary-row .exframe-expand {
+  background: url('images/menu-expanded.png') no-repeat center;
+}
+.exframe-bioassay-summary-row .exframe-expand.collapsed {
+  background: url('images/menu-collapsed.png') no-repeat center;
+}
+
+
+/* Bioassay field collection table action links */
+.node .field_collection_item_operations ul {
+  padding-left: 0;
+}
+.field_collection_item_operations li {
+  list-style: none;
+}
+
+#exframe-analyze-button-throbber {
+ position: absolute;
+ right: 3px;
+ bottom: 27px;
+ background-position: 0 -20px;
+ height: 13px;
+ width: 14px;
+ background-image: url('../../../../../misc/throbber.gif');
+}
