@@ -1,7 +1,7 @@
 section	subsection	field	variable	isa_value
 investigation	in_ont	ONTOLOGY SOURCE REFERENCE	header	
 investigation	in_ont	Term Source Name	ont_short_name	
-investigation	in_ont	Term Source File		
+investigation	in_ont	Term Source File	ont_file	
 investigation	in_ont	Term Source Version	ont_version	
 investigation	in_ont	Term Source Description	ont_long_name	
 investigation	in_general	INVESTIGATION	header	
@@ -10,6 +10,10 @@ investigation	in_general	Investigation Title
 investigation	in_general	Investigation Description		
 investigation	in_general	Investigation Submission Date		
 investigation	in_general	Investigation Public Release Date		
+investigation	in_general	Comment[Created With Configuration]		
+investigation	in_general	Comment[Last Opened With Configuration]		
+investigation	in_general	Comment[Created With Configuration]		
+investigation	in_general	Comment[Last Opened With Configuration]		
 investigation	in_pub	INVESTIGATION PUBLICATIONS	header	
 investigation	in_pub	Investigation PubMed ID	pubmed_id	
 investigation	in_pub	Investigation Publication DOI	doi	
@@ -33,10 +37,21 @@ investigation	in_contacts	Investigation Person Roles Term Source REF
 study	stu_general	STUDY	header	
 study	stu_general	Study Identifier	accession	
 study	stu_general	Study Title	exp_title	
+study	stu_general	Study Description	summary	
+study	stu_general	Comment[Study Grant Number]		
+study	stu_general	Comment[Study Funding Agency]		
 study	stu_general	Study Submission Date	date	
 study	stu_general	Study Public Release Date		
-study	stu_general	Study Description	summary	
 study	stu_study_file	Study File Name	study_name	
+study	stu_comment	Comment[Manuscript Licence]		
+study	stu_comment	Comment[Experimental Metadata Licence]		
+study	stu_comment	Comment[Data Repository]		
+study	stu_comment	Comment[Data Record Accession]		
+study	stu_comment	Comment[Data Record URI]		
+study	stu_comment	Comment[Supplementary Information File Name]		
+study	stu_comment	Comment[Supplementary Information File Type]		
+study	stu_comment	Comment[Supplementary Information File URI]		
+study	stu_comment	Comment[Subject Keywords]		
 study	stu_design	STUDY DESIGN DESCRIPTORS	header	
 study	stu_design	Study Design Type	experiment_design_type	
 study	stu_design	Study Design Type Term Accession Number		
@@ -50,10 +65,10 @@ study	stu_pub	Study Publication Status	pub_status
 study	stu_pub	Study Publication Status Term Accession Number	pub_status_oid	
 study	stu_pub	Study Publication Status Term Source REF	pub_status_ont	
 study	stu_factors	STUDY FACTORS	header	
-study	stu_factors	Study Factor Name		
-study	stu_factors	Study Factor Type		
-study	stu_factors	Study Factor Type Term Accession Number		
-study	stu_factors	Study Factor Type Term Source REF		
+study	stu_factors	Study Factor Name	factor	
+study	stu_factors	Study Factor Type	factor	
+study	stu_factors	Study Factor Type Term Accession Number	factor_oid	
+study	stu_factors	Study Factor Type Term Source REF	factor_ont	
 study	stu_assays	STUDY ASSAYS	header	
 study	stu_assays	Study Assay Measurement Type	isa_measurement_type	
 study	stu_assays	Study Assay Measurement Type Term Accession Number	mt_oid	
@@ -71,7 +86,7 @@ study	stu_protocols	Study Protocol Type Term Source REF
 study	stu_protocols	Study Protocol Description	protocol_text	
 study	stu_protocols	Study Protocol URI		
 study	stu_protocols	Study Protocol Version		
-study	stu_protocols	Study Protocol Parameters Name	protocol_parameter	
+study	stu_protocols	Study Protocol Parameters Name	parameter_list	
 study	stu_protocols	Study Protocol Parameters Name Term Accession Number		
 study	stu_protocols	Study Protocol Parameters Name Term Source REF		
 study	stu_protocols	Study Protocol Components Name		
@@ -90,52 +105,231 @@ study	stu_contacts	Study Person Affiliation	affiliation
 study	stu_contacts	Study Person Roles		
 study	stu_contacts	Study Person Roles Term Accession Number		
 study	stu_contacts	Study Person Roles Term Source REF		
-assay	microarray	Sample Name	replicate_name	
-assay	microarray	Protocol REF	extraction_protocol	RNA extraction
-assay	microarray	Extract Name	replicate_name	
-assay	microarray	Material Type	cellular_material	
-assay	microarray	Term Source REF	cellular_material_ont	
-assay	microarray	Term Accession Number	cellular_material_oid	
-assay	microarray	Protocol REF	label_protocol	labeling
-assay	microarray	Labeled Extract Name	replicate_name	
-assay	microarray	Label	label	
-assay	microarray	Term Source REF	label_ont	
-assay	microarray	Term Accession Number	label_oid	
-assay	microarray	Protocol REF	hybridization_protocol	nucleic acid hybridization
-assay	microarray	Hybridization Assay Name	replicate_name	
-assay	microarray	Array Design REF	platform	
-assay	microarray	Protocol REF	data_collection_protocol	data collection
-assay	microarray	Scan Name	replicate_filename	
-assay	microarray	Array Data File	replicate_file	
-assay	microarray	Protocol REF	normalization_protocol	normalization data transformation
-assay	microarray	Normalization Name	normalization_method	
-assay	microarray	Derived Array Data Matrix File	gct_file_url	
-assay	ip-seq	Sample Name	replicate_name	
-assay	ip-seq	Protocol REF	extraction_protocol	nucleic acid preparation
-assay	ip-seq	Parameter Value[cross linking]	cross_linking	
-assay	ip-seq	Parameter Value[DNA fragmentation]	fragmentation_method	
-assay	ip-seq	Parameter Value[DNA fragment size]	fragment_length_value	
-assay	ip-seq	Unit	fragment_length_unit	
-assay	ip-seq	Term Source REF	fragment_length_unit_ont	
-assay	ip-seq	Term Accession Number	fragment_length_unit_oid	
-assay	ip-seq	Parameter Value[immunoprecipitation antibody]	imp_antibody	
-assay	ip-seq	Extract Name	replicate_name	
-assay	ip-seq	Protocol REF	library_const_protocol	library preparation
-assay	ip-seq	Parameter Value[library source]	library_source	
-assay	ip-seq	Parameter Value[library strategy]	library_strategy	
-assay	ip-seq	Parameter Value[library selection]	library_selection	
-assay	ip-seq	Parameter Value[library layout]	library_layout	
-assay	ip-seq	Protocol REF	sequencing_protocol	nucleic acid sequencing
-assay	ip-seq	Parameter Value[sequencing instrument]	platform	
-assay	ip-seq	Parameter Value[base caller]	base_caller	
-assay	ip-seq	Term Source REF	base_caller_ont	
-assay	ip-seq	Term Accession Number	base_caller_oid	
-assay	ip-seq	Parameter Value[quality score]	quality_score_system	
-assay	ip-seq	Term Source REF	quality_score_system_ont	
-assay	ip-seq	Term Accession Number	quality_score_system_oid	
-assay	ip-seq	Assay Name	assay_name	
-assay	ip-seq	Raw Data File	replicate_file	
+study	stu_contacts	Comment[Study Person REF]		
+assay	microarray_base	Sample Name	replicate_name	
+assay	microarray_base	Comment[Group Name]	assay_name
+assay	microarray_base	Factor	factor	
+assay	microarray_base	Protocol REF	extraction_protocol	nucleic acid extraction
+assay	microarray_base	Extract Name	replicate_name	
+assay	microarray_base	Material Type	cellular_material	
+assay	microarray_base	Term Source REF	cellular_material_ont	
+assay	microarray_base	Term Accession Number	cellular_material_oid	
+assay	microarray_base	Protocol REF	label_protocol	labeling
+assay	microarray_base	Labeled Extract Name	replicate_name	
+assay	microarray_base	Label	label	
+assay	microarray_base	Term Source REF	label_ont	
+assay	microarray_base	Term Accession Number	label_oid	
+assay	microarray_base	Protocol REF	hybridization_protocol	hybridization
+assay	microarray_base	Hybridization Assay Name	replicate_name	
+assay	microarray_base	Array Design REF	platform	
+assay	microarray_base	Protocol REF	scan_protocol	data collection
+assay	microarray_base	Scan Name	replicate_filename	
+assay	microarray_base	Array Data File	replicate_file	
+assay	microarray_1	Protocol REF	qc_protocol	arrayQM
+assay	microarray_1	Parameter Value[array design]	blank	
+assay	microarray_1	Parameter Value[annotation file]	blank	
+assay	microarray_1	Data Transformation Name	qc_raw_dtform	
+assay	microarray_1	Derived Array Data File	qc_raw_url	
+assay	microarray_1	Protocol REF	blank	
+assay	microarray_1	Data Transformation Name	blank	
+assay	microarray_1	Derived Array Data Matrix File	blank	
+assay	microarray_1	Protocol REF	blank	
+assay	microarray_1	Data Transformation Name	blank	
+assay	microarray_1	Derived Array Data Matrix File	blank	
+assay	microarray_1	Comment [Data Repository]	blank	
+assay	microarray_1	Comment [Data Record Accession]	blank	
+assay	microarray_2	Protocol REF	normalization_protocol	normalization data transformation
+assay	microarray_2	Parameter Value[array design]	array_design	
+assay	microarray_2	Parameter Value[annotation file]	annotation_file	
+assay	microarray_2	Data Transformation Name	normalization_method	
+assay	microarray_2	Derived Array Data File	gct_file_url	
+assay	microarray_2	Protocol REF	qc_protocol	arrayQM
+assay	microarray_2	Data Transformation Name	qc_dtform	
+assay	microarray_2	Derived Array Data Matrix File	qc_url	
+assay	microarray_2	Protocol REF	blank	
+assay	microarray_2	Data Transformation Name	blank	
+assay	microarray_2	Derived Array Data Matrix File	blank	
+assay	microarray_2	Comment [Data Repository]	blank	
+assay	microarray_2	Comment [Data Record Accession]	blank	
+assay	microarray_3	Protocol REF	normalization_protocol	normalization data transformation
+assay	microarray_3	Parameter Value[array design]	array_design	
+assay	microarray_3	Parameter Value[annotation file]	annotation_file	
+assay	microarray_3	Data Transformation Name	normalization_method	
+assay	microarray_3	Derived Array Data File	gct_file_url	
+assay	microarray_3	Protocol REF	pathprint_protocol	Pathprint
+assay	microarray_3	Data Transformation Name	pathprint_dtform	
+assay	microarray_3	Derived Array Data Matrix File	pathprint_file_url	
+assay	microarray_3	Protocol REF	pathpluri_protocol	Pathprint pluriconsensus
+assay	microarray_3	Data Transformation Name	pathpluri_dtform	
+assay	microarray_3	Derived Array Data Matrix File	pathconsensus_file_url	
+assay	microarray_3	Comment [Data Repository]	blank	
+assay	microarray_3	Comment [Data Record Accession]	blank	
+assay	microarray_4	Protocol REF	normalization_protocol	normalization data transformation
+assay	microarray_4	Parameter Value[array design]	array_design	
+assay	microarray_4	Parameter Value[annotation file]	annotation_file	
+assay	microarray_4	Data Transformation Name	normalization_method	
+assay	microarray_4	Derived Array Data File	gct_file_url	
+assay	microarray_4	Protocol REF	pathprint_protocol	Pathprint
+assay	microarray_4	Data Transformation Name	pathprint_dtform	
+assay	microarray_4	Derived Array Data Matrix File	pathprint_file_url	
+assay	microarray_4	Protocol REF	pathgeo_protocol	Pathprint GEO
+assay	microarray_4	Data Transformation Name	pathgeo_dtform	
+assay	microarray_4	Derived Array Data Matrix File	pathgeo_file_url	
+assay	microarray_4	Comment [Data Repository]	blank	
+assay	microarray_4	Comment [Data Record Accession]	blank	
+assay	microarray_5	Protocol REF	normalization_protocol	normalization data transformation
+assay	microarray_5	Parameter Value[array design]	array_design	
+assay	microarray_5	Parameter Value[annotation file]	annotation_file	
+assay	microarray_5	Data Transformation Name	normalization_method	
+assay	microarray_5	Derived Array Data File	gct_file_url	
+assay	microarray_5	Protocol REF	grpall_protocol	Group comparison
+assay	microarray_5	Data Transformation Name	grpall_dtform	
+assay	microarray_5	Derived Array Data Matrix File	grpall_file_url	
+assay	microarray_5	Protocol REF	blank	
+assay	microarray_5	Data Transformation Name	blank	
+assay	microarray_5	Derived Array Data Matrix File	blank	
+assay	microarray_5	Comment [Data Repository]	blank	
+assay	microarray_5	Comment [Data Record Accession]	blank	
+assay	chip_base	Sample Name	replicate_name	
+assay	chip_base	Comment[Group Name]	assay_name
+assay	chip_base	Factor	factor	
+assay	chip_base	Protocol REF	extraction_protocol	nucleic acid extraction
+assay	chip_base	Parameter Value[cross linking]	cross_linking	
+assay	chip_base	Parameter Value[DNA fragmentation]	fragmentation_method	
+assay	chip_base	Parameter Value[DNA fragment size]	fragment_length_value	
+assay	chip_base	Unit	fragment_length_unit	
+assay	chip_base	Term Source REF	fragment_length_unit_ont	
+assay	chip_base	Term Accession Number	fragment_length_unit_oid	
+assay	chip_base	Parameter Value[antibody]	imp_antibody	
+assay	chip_base	Extract Name	replicate_name	
+assay	chip_base	Protocol REF	library_const_protocol	library construction
+assay	chip_base	Parameter Value[library source]	library_source	
+assay	chip_base	Parameter Value[library strategy]	library_strategy	
+assay	chip_base	Parameter Value[library selection]	library_selection	
+assay	chip_base	Parameter Value[library layout]	library_layout	
+assay	chip_base	Protocol REF	sequencing_protocol	nucleic acid sequencing
+assay	chip_base	Parameter Value[sequencing instrument]	platform	
+assay	chip_base	Parameter Value[base caller]	base_caller	
+assay	chip_base	Parameter Value[quality score]	quality_score_system	
+assay	chip_base	Assay Name	assay_name	
+assay	chip_base	Raw Data File	replicate_file	
+assay	chip_base	Comment[Replicate Id]	replicate_fid	
+assay	chip_1	Protocol REF	qc_protocol	sequence quality control
+assay	chip_1	Parameter Value[software]	qc_software	fastqc
+assay	chip_1	Parameter Value[version]	qc_version	0.10.0
+assay	chip_1	Parameter Value[genome build]	blank	
+assay	chip_1	Parameter Value[m]	blank	
+assay	chip_1	Data Transformation Name	qc_dtform	FastQC
+assay	chip_1	Derived Data File	qc_url	
+assay	chip_1	Protocol REF	blank	
+assay	chip_1	Parameter Value[software]	blank	
+assay	chip_1	Parameter Value[version]	blank	
+assay	chip_1	Data Transformation Name	blank	
+assay	chip_1	Derived Data File	blank	
+assay	chip_1	Protocol REF	blank	
+assay	chip_1	Data Transformation Name	blank	
+assay	chip_1	Derived Data File	blank	
+assay	chip_1	Protocol REF	blank	
+assay	chip_1	Parameter Value[software]	blank	
+assay	chip_1	Parameter Value[version]	blank	
+assay	chip_1	Parameter Value[fdr]	blank	
+assay	chip_1	Data Transformation Name	blank	
+assay	chip_1	Derived Data File	blank	
+assay	chip_1	Comment [Data Repository]	blank	
+assay	chip_1	Comment [Data Record Accession]	blank	
+assay	chip_1	Comment[Replicate Id]	replicate_fid	
+assay	chip_2	Protocol REF	alignment_protocol	sequence alignment
+assay	chip_2	Parameter Value[software]	align_software	Bowtie
+assay	chip_2	Parameter Value[version]	align_version	1.1.2
+assay	chip_2	Parameter Value[genome build]	align_genome	hg19
+assay	chip_2	Parameter Value[m]	align_m	1
+assay	chip_2	Data Transformation Name	align_dtform	alignment
+assay	chip_2	Derived Data File	align_url	
+assay	chip_2	Protocol REF	peakm_protocol	peak modeling
+assay	chip_2	Parameter Value[software]	peakm_software	MACS2_callpeak
+assay	chip_2	Parameter Value[version]	peakm_version	2.0.10
+assay	chip_2	Data Transformation Name	peakm_dtform	MACS2_TF_model
+assay	chip_2	Derived Data File	peakm_url	
+assay	chip_2	Protocol REF	sd_protocol	signal density
+assay	chip_2	Data Transformation Name	sd_dtform	MACS2_TF_signal
+assay	chip_2	Derived Data File	sd_url	
+assay	chip_2	Protocol REF	peakc_protocol	peak calling
+assay	chip_2	Parameter Value[software]	peakc_software	MACS2_callpeak
+assay	chip_2	Parameter Value[version]	peakc_version	2.0.10
+assay	chip_2	Parameter Value[fdr]	peak_fdr	0.05
+assay	chip_2	Data Transformation Name	peakc_dtform	MACS2_TF_peak_calls
+assay	chip_2	Derived Data File	peakc_url	
+assay	chip_2	Comment [Data Repository]	blank	
+assay	chip_2	Comment [Data Record Accession]	blank	
+assay	chip_2	Comment[Replicate Id]	replicate_fid	
+assay	rna_base	Sample Name	replicate_name	
+assay	rna_base	Comment[Group Name]	assay_name
+assay	rna_base	Factor	factor	
+assay	rna_base	Protocol REF	sample_preparation_protocol	nucleic acid preparation
+assay	rna_base	Extract Name	replicate_name	
+assay	rna_base	Protocol REF	library_preparation_protocol	library construction
+assay	rna_base	Parameter Value[library source]	library_source	
+assay	rna_base	Parameter Value[library strategy]	library_strategy	
+assay	rna_base	Parameter Value[library selection]	library_selection	
+assay	rna_base	Parameter Value[library layout]	library_layout	
+assay	rna_base	Parameter Value[mid]	multiplex_id	
+assay	rna_base	Parameter Value[fragmentation method]	fragmentation_method	
+assay	rna_base	Parameter Value[fragment length]	fragment_length_value	
+assay	rna_base	Unit	fragment_length_unit	
+assay	rna_base	Protocol REF	sequencing_protocol	nucleic acid sequencing
+assay	rna_base	Parameter Value[sequencing instrument]	platform	
+assay	rna_base	Parameter Value[base caller]	base_caller	
+assay	rna_base	Parameter Value[quality score]	quality_score_system	
+assay	rna_base	Assay Name	assay_name	
+assay	rna_base	Raw Data File	replicate_file	
+assay	rna_base	Comment[Replicate Id]	replicate_fid	
+assay	rna_1	Protocol REF	qc_protocol	sequence quality control
+assay	rna_1	Parameter Value[software]	qc_software	fastqc
+assay	rna_1	Parameter Value[version]	qc_version	0.10.0
+assay	rna_1	Parameter Value[genome build]	blank	
+assay	rna_1	Parameter Value[annotation file]	blank	
+assay	rna_1	Data Transformation Name	qc_dtform	FastQC
+assay	rna_1	Derived Data File	qc_url	
+assay	rna_1	Protocol REF	blank	
+assay	rna_1	Parameter Value[software]	blank	
+assay	rna_1	Parameter Value[version]	blank	
+assay	rna_1	Data Transformation Name	blank	
+assay	rna_1	Derived Data File	blank	
+assay	rna_1	Comment [Data Repository]	blank	
+assay	rna_1	Comment [Data Record Accession]	blank	
+assay	rna_1	Comment[Replicate Id]	replicate_fid	
+assay	rna_2	Protocol REF	alignment_protocol	sequence alignment
+assay	rna_2	Parameter Value[software]	align_software	TopHat2
+assay	rna_2	Parameter Value[version]	align_version	v2.0.9
+assay	rna_2	Parameter Value[genome build]	align_genome	
+assay	rna_2	Parameter Value[annotation file]	align_annotation	Ensembl v75
+assay	rna_2	Data Transformation Name	align_dtform	alignment
+assay	rna_2	Derived Data File	align_url	
+assay	rna_2	Protocol REF	rquan_protocol	RNA quantification
+assay	rna_2	Parameter Value[software]	rquan_software	HTSeq
+assay	rna_2	Parameter Value[version]	rquan_version	0.5.4p5
+assay	rna_2	Data Transformation Name	rquan_dtform	expression_counts
+assay	rna_2	Derived Data File	rquan_file	
+assay	rna_2	Comment [Data Repository]	blank	
+assay	rna_2	Comment[Replicate Id]	replicate_fid	
+assay	rna_2	Comment [Data Record Accession]	blank	
+assay	rna_3	Protocol REF	alignment_protocol	sequence alignment
+assay	rna_3	Parameter Value[software]	align_software	TopHat2
+assay	rna_3	Parameter Value[version]	align_version	v2.0.9
+assay	rna_3	Parameter Value[genome build]	align_genome	
+assay	rna_3	Parameter Value[annotation file]	align_annotation	Ensembl v75
+assay	rna_3	Data Transformation Name	align_dtform	alignment
+assay	rna_3	Derived Data File	align_url	
+assay	rna_3	Protocol REF	rqc_protocol	quality control
+assay	rna_3	Parameter Value[software]	rqc_software	rnaseqc
+assay	rna_3	Parameter Value[version]	rqc_version	v1.1.7
+assay	rna_3	Data Transformation Name	rqc_dtform	rnaseqc
+assay	rna_3	Derived Data File	rqc_file	
+assay	rna_3	Comment [Data Repository]	blank	
+assay	rna_3	Comment [Data Record Accession]	blank	
+assay	rna_3	Comment[Replicate Id]	replicate_fid	
 assay	other-seq	Sample Name	replicate_name	
+assay	other-seq	Comment[Group Name]	assay_name
 assay	other-seq	Protocol REF	sample_preparation_protocol	nucleic acid preparation
 assay	other-seq	Parameter Value[cross linking]	cross_linking	
 assay	other-seq	Parameter Value[DNA fragmentation]	fragmentation_method	
@@ -159,6 +353,7 @@ assay	other-seq	Term Source REF	quality_score_system_ont
 assay	other-seq	Term Accession Number	quality_score_system_oid	
 assay	other-seq	Assay Name	assay_name	
 assay	other-seq	Raw Data File	replicate_file	
+assay	other-seq	Factor	factor	
 sample	biomaterial	Source Name	biomaterial_name	
 sample	biomaterial	Characteristics[organism]	organism	
 sample	biomaterial	Term Source REF	organism_ont	
@@ -184,10 +379,10 @@ sample	biomaterial	Term Accession Number	genotype_oid
 sample	biomaterial	Characteristics[gene]	genes	
 sample	biomaterial	Term Source REF	genes_ont	
 sample	biomaterial	Term Accession Number	genes_oid	
-sample	biomaterial	Characteristics[cell type]	cell_type	
+sample	biomaterial	Characteristics[cell line]	cell_type	
 sample	biomaterial	Term Source REF	cell_type_ont	
 sample	biomaterial	Term Accession Number	cell_type_oid	
-sample	biomaterial	Characteristics[postive markers]	positive_markers	
+sample	biomaterial	Characteristics[positive markers]	positive_markers	
 sample	biomaterial	Term Source REF	positive_markers_ont	
 sample	biomaterial	Term Accession Number	positive_markers_oid	
 sample	biomaterial	Characteristics[negative markers]	negative_markers	
@@ -205,14 +400,61 @@ sample	biomaterial	Term Accession Number	passages_oid
 sample	biomaterial	Characteristics[biomarkers]	biomarkers	
 sample	biomaterial	Term Source REF	biomarkers_ont	
 sample	biomaterial	Term Accession Number	biomarkers_oid	
-sample	biomaterial	Characteristics[surface markers]	surface_markers	
-sample	biomaterial	Term Source REF	surface_markers_ont	
-sample	biomaterial	Term Accession Number	surface_markers_oid	
-sample	biomaterial	Characteristics[growth protocol]	growth_protocol	
-sample	biomaterial	Characteristics[treatment]	treatment_compound	
-sample	biomaterial	Term Source REF	treatment_compound_ont	
-sample	biomaterial	Term Accession Number	treatment_compound_oid	
-sample	biomaterial	Characteristics[treatment protocol]	treatment_protocol	
+sample	biomaterial	Characteristics[treatment]	treatment_type	
+sample	biomaterial	Term Source REF	treatment_type_ont	
+sample	biomaterial	Term Accession Number	treatment_type_oid	
 sample	biomaterial	Characteristics[notes]	biomaterial_notes	
 sample	biomaterial	Protocol REF	biomaterial_protocol	
 sample	biomaterial	Sample Name	replicate_name	
+sample_animal	biomaterial	Source Name	biomaterial_name	
+sample_animal	biomaterial	Characteristics[organism]	organism	
+sample_animal	biomaterial	Term Source REF	organism_ont	
+sample_animal	biomaterial	Term Accession Number	organism_oid	
+sample_animal	biomaterial	Characteristics[strain]	strain	
+sample_animal	biomaterial	Term Source REF	strain_ont	
+sample_animal	biomaterial	Term Accession Number	strain_oid	
+sample_animal	biomaterial	Characteristics[organism part]	tissue_type	
+sample_animal	biomaterial	Term Source REF	tissue_type_ont	
+sample_animal	biomaterial	Term Accession Number	tissue_type_oid	
+sample_animal	biomaterial	Characteristics[development stage]	developmental_stage	
+sample_animal	biomaterial	Term Source REF	developmental_stage_ont	
+sample_animal	biomaterial	Term Accession Number	developmental_stage_oid	
+sample_animal	biomaterial	Characteristics[age]	age	
+sample_animal	biomaterial	Term Source REF	age_ont	
+sample_animal	biomaterial	Term Accession Number	age_oid	
+sample_animal	biomaterial	Characteristics[sex]	sex	
+sample_animal	biomaterial	Term Source REF	sex_ont	
+sample_animal	biomaterial	Term Accession Number	sex_oid	
+sample_animal	biomaterial	Characteristics[disease state]	disease_state	
+sample_animal	biomaterial	Term Source REF	disease_state_ont	
+sample_animal	biomaterial	Term Accession Number	disease_state_oid	
+sample_animal	biomaterial	Characteristics[treatment]	treatment_type	
+sample_animal	biomaterial	Term Source REF	treatment_type_ont	
+sample_animal	biomaterial	Term Accession Number	treatment_type_oid	
+sample_animal	biomaterial	Characteristics[time course]	time_point	
+sample_animal	biomaterial	Term Source REF	time_point_ont	
+sample_animal	biomaterial	Term Accession Number	time_point_oid	
+sample_animal	biomaterial	Protocol REF	biomaterial_protocol	
+sample_animal	biomaterial	Sample Name	replicate_name	
+sample_animal	biomaterial	Characteristics[genotype]	genotype	
+sample_animal	biomaterial	Term Source REF	genotype_ont	
+sample_animal	biomaterial	Term Accession Number	genotype_oid	
+sample_animal	biomaterial	Characteristics[gene]	genes	
+sample_animal	biomaterial	Term Source REF	genes_ont	
+sample_animal	biomaterial	Term Accession Number	genes_oid	
+sample_animal	biomaterial	Characteristics[cell type]	cell_type	
+sample_animal	biomaterial	Term Source REF	cell_type_ont	
+sample_animal	biomaterial	Term Accession Number	cell_type_oid	
+sample_animal	biomaterial	Characteristics[passages]	passages	
+sample_animal	biomaterial	Term Source REF	passages_ont	
+sample_animal	biomaterial	Term Accession Number	passages_oid	
+sample_animal	biomaterial	Characteristics[positive markers]	positive_markers	
+sample_animal	biomaterial	Term Source REF	positive_markers_ont	
+sample_animal	biomaterial	Term Accession Number	positive_markers_oid	
+sample_animal	biomaterial	Characteristics[negative markers]	negative_markers	
+sample_animal	biomaterial	Term Source REF	negative_markers_ont	
+sample_animal	biomaterial	Term Accession Number	negative_markers_oid	
+sample_animal	biomaterial	Characteristics[biomarkers]	biomarkers	
+sample_animal	biomaterial	Term Source REF	biomarkers_ont	
+sample_animal	biomaterial	Term Accession Number	biomarkers_oid	
+sample_animal	biomaterial	Characteristics[notes]	biomaterial_notes	

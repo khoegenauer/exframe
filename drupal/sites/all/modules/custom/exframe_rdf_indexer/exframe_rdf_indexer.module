@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the exframe_rdf_indexer feature.
+ */
+
+include_once 'exframe_rdf_indexer.features.inc';

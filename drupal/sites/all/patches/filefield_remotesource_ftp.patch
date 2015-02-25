@@ -1,0 +1,24 @@
+diff --git a/drupal/sites/all/modules/contrib/remote_file_source/remote_file_source.module b/drupal/sites/all/modules/contrib/remote_file_source/remote_file_source.module
+index 84f85b7..93634d0 100644
+--- a/drupal/sites/all/modules/contrib/remote_file_source/remote_file_source.module
++++ b/drupal/sites/all/modules/contrib/remote_file_source/remote_file_source.module
+@@ -91,12 +91,12 @@ function filefield_source_remotefile_value($element, &$item) {
+       form_error($element, t('Invalid Remote File URL.'));
+       return;
+     }
+-    elseif (!file_stream_wrapper_valid_scheme(file_uri_scheme($value))) {
++    elseif (substr($value,0,3) != 'ftp' && !file_stream_wrapper_valid_scheme(file_uri_scheme($value))) {
+       // Check that the scheme is supported.
+       form_error($element, t('Remote File URLs with the %scheme scheme are not supported.', array('%scheme' => $scheme)));
+       return;
+     }
+-    else {
++    elseif(substr($value,0,3) != 'ftp') {
+       // Check that the file exists.
+       $request = drupal_http_request($value, array('method' => 'HEAD'));
+       if (!empty($request->error)) {
+@@ -131,4 +131,64 @@ function filefield_source_remotefile_value($element, &$item) {
+       $item = array_merge($item, (array) $file);
+     }    
+   }
+-}

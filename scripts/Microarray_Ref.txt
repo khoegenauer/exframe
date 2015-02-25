@@ -1,20 +1,21 @@
-array_name	array_short	array_gpl	process	db	cdf	probe	symbol	probe_num	tid
-Affymetrix Human Gene 1.0 ST (Transcript/Gene)	hgu_1_0st	GPL6244	RMA	pd.hugene.1.0.st.v1				33296	254
-Affymetrix Human Genome Focus	hgufocus	GPL201	GCRMA	hgfocus.db	hgfocuscdf	hgfocusprobe	hgfocusSYMBOL		255
-Affymetrix Human Genome U133 Plus 2.0 Array	hgu133plus2	GPL570	GCRMA	hgu133plus2.db	hgu133plus2cdf	hgu133plus2probe	hgu133plus2SYMBOL	54675	50
-Affymetrix Human Genome U133A Array	hgu133a	GPL96	GCRMA	hgu133a.db	hgu133acdf	hgu133aprobe	hgu133aSYMBOL	22283	51
-Affymetrix Human Genome U133B Array	hgu133b	GPL97	GCRMA	hgu133b.db	hgu133bcdf	hgu133bprobe	hgu133bSYMBOL	22645	252
-Affymetrix Human Genome U133A 2.0 Array	hgu133a2	GPL571	GCRMA	hgu133a2.db	hgu133a2cdf	hgu133a2probe	hgu133a2SYMBOL	22277	491
-Affymetrix Human Genome U95A v2	hgu95av	GPL8300	GCRMA	hgu95av2.db	hgu95av2cdf	hgu95av2probe	hgu95av2SYMBOL	12625	487
-Affymetrix Mouse Expression 430A Array	moe430a	GPL339	GCRMA	moe430a.db	moe430acdf	moe430aprobe	moe430aSYMBOL	22690	456
-Affymetrix Mouse Expression 430B Array	moe430b	GPL340	GCRMA	moe430b.db	moe430bcdf	moe430bprobe	moe430bSYMBOL	22575	457
-Affymetrix Mouse Gene 1.0 ST (Transcript/Gene)	mg_1_0st	GPL6246	RMA	pd.mogene.1.0.st.v1				35556	341
-Affymetrix Mouse Genome 430 2.0 Array	mouse4302	GPL1261	GCRMA	mouse4302.db	mouse4302cdf	mouse4302probe	mouse4302SYMBOL	45101	52
-Affymetrix Mouse Genome 430A 2.0 Array	mouse430a2	GPL8321	GCRMA	mouse430a2.db	mouse430a2cdf	mouse430a2probe	mouse430a2SYMBOL	22690	53
-Affymetrix Mouse Genome U74A v2	mgu74av2	GPL81	GCRMA	mgu74av2.db	mgu74av2cdf	mgu74av2probe	mgu74av2SYMBOL	12488	287
-Affymetrix Mouse Genome U74B v2	mgu74bv2	GPL82	GCRMA	mgu74bv2.db	mgu74bv2cdf	mgu74bv2probe	mgu74bv2SYMBOL	12477	288
-Affymetrix Mouse Genome U74C v2	mgu74cv2	GPL83	GCRMA	mgu74cv2.db	mgu74cv2cdf	mgu74cv2probe	mgu74cv2SYMBOL	11934	289
-Affymetrix Rat Expression 230A Array	rae230a2	GPL341	GCRMA	rae230a.db	rae230acdf	rae230aprobe	rae230aSYMBOL	15923	454
-Affymetrix Rat Expression 230B Array	rae230b2	GPL342	GCRMA	rae230b.db	rae230bcdf	rae230bprobe	rae230bSYMBOL	15333	455
-Affymetrix Zebrafish Genome Array	zebrafish	GPL1319	GCRMA	zebrafish.db	zebrafishcdf	zebrafishprobe	zebrafishSYMBOL	15617	55
-Affymetrix Zebrafish Gene 1.0 ST Array (Transcript/Gene)	zebgene_1_0st	GPL16933	RMA	pd.zebgene.1.0.st				33296	713
+array_name	array_short	array_gpl	process	rma_target	pd	db	cdf	probe	symbol	probe_num	tid	organism
+Affymetrix Human Genome Focus	hgufocus	GPL201	RMA		pd.hg.focus	hgfocus.db	hgfocuscdf	hgfocusprobe	hgfocusSYMBOL	8793	255	Homo sapiens
+Affymetrix Human Genome U133 Plus 2.0 Array	hgu133plus2	GPL570	RMA		pd.hg.u133.plus.2	hgu133plus2.db	hgu133plus2cdf	hgu133plus2probe	hgu133plus2SYMBOL	54675	50	Homo sapiens
+Affymetrix Human Genome U133A Array	hgu133a	GPL96	RMA		pd.hg.u133a	hgu133a.db	hgu133acdf	hgu133aprobe	hgu133aSYMBOL	22283	51	Homo sapiens
+Affymetrix Human Genome U133B Array	hgu133b	GPL97	RMA		pd.hg.u133b	hgu133b.db	hgu133bcdf	hgu133bprobe	hgu133bSYMBOL	22645	252	Homo sapiens
+Affymetrix Human Genome U133A 2.0 Array	hgu133a2	GPL571	RMA		pd.hg.u133a.2	hgu133a2.db	hgu133a2cdf	hgu133a2probe	hgu133a2SYMBOL	22277	491	Homo sapiens
+Affymetrix Human Genome U95A v2	hgu95av	GPL8300	RMA		pd.hg.u95av2	hgu95av2.db	hgu95av2cdf	hgu95av2probe	hgu95av2SYMBOL	12625	487	Homo sapiens
+Affymetrix Mouse Expression 430A Array	moe430a	GPL339	RMA		pd.moe430a	moe430a.db	moe430acdf	moe430aprobe	moe430aSYMBOL	22690	456	Mus musculus
+Affymetrix Mouse Expression 430B Array	moe430b	GPL340	RMA		pd.moe430b	moe430b.db	moe430bcdf	moe430bprobe	moe430bSYMBOL	22575	457	Mus musculus
+Affymetrix Mouse Genome 430 2.0 Array	mouse4302	GPL1261	RMA		pd.mouse430.2	mouse4302.db	mouse4302cdf	mouse4302probe	mouse4302SYMBOL	45101	52	Mus musculus
+Affymetrix Mouse Genome 430A 2.0 Array	mouse430a2	GPL8321	RMA		pd.mouse430a.2	mouse430a2.db	mouse430a2cdf	mouse430a2probe	mouse430a2SYMBOL	22690	53	Mus musculus
+Affymetrix Mouse Genome U74A v2	mgu74av2	GPL81	RMA		pd.mg.u74av2	mgu74av2.db	mgu74av2cdf	mgu74av2probe	mgu74av2SYMBOL	12488	287	Mus musculus
+Affymetrix Mouse Genome U74B v2	mgu74bv2	GPL82	RMA		pd.mg.u74bv2	mgu74bv2.db	mgu74bv2cdf	mgu74bv2probe	mgu74bv2SYMBOL	12477	288	Mus musculus
+Affymetrix Mouse Genome U74C v2	mgu74cv2	GPL83	RMA		pd.mg.u74cv2	mgu74cv2.db	mgu74cv2cdf	mgu74cv2probe	mgu74cv2SYMBOL	11934	289	Mus musculus
+Affymetrix Rat Expression 230A Array	rae230a2	GPL341	RMA		pd.rae230a	rae230a.db	rae230acdf	rae230aprobe	rae230aSYMBOL	15923	454	Rattus norvegicus
+Affymetrix Rat Expression 230B Array	rae230b2	GPL342	RMA		pd.rae230b	rae230b.db	rae230bcdf	rae230bprobe	rae230bSYMBOL	15333	455	Rattus norvegicus
+Affymetrix Zebrafish Genome Array	zebrafish	GPL1319	RMA		pd.zebrafish	zebrafish.db	zebrafishcdf	zebrafishprobe	zebrafishSYMBOL	15617	55	Danio rerio
+Affymetrix Human Gene 1.0 ST (Transcript/Gene)	hgu_1_0st	GPL6244	RMA	yes	pd.hugene.1.0.st.v1	hugene10sttranscriptcluster.db				33297	254	Homo sapiens
+Affymetrix Mouse Gene 1.0 ST (Transcript/Gene)	mg_1_0st	GPL6246	RMA	yes	pd.mogene.1.0.st.v1	mogene10sttranscriptcluster.db				35556	341	Mus musculus
+Affymetrix Mouse Gene 2.0 ST (Transcript/Gene)	mogene_2_0st	GPL16570	RMA	yes	pd.mogene.2.0.st	mogene20sttranscriptcluster.db				41345	755	Mus musculus
+Affymetrix Zebrafish Gene 1.0 ST Array (Transcript/Gene)	zebgene_1_0st	GPL16933	RMA	yes	pd.zebgene.1.0.st	NA				75212	713	Danio rerio

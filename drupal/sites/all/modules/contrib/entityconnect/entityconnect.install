@@ -10,12 +10,16 @@
  */
 function entityconnect_requirements($phase) {
   $requirements = array();
-  $t = get_t();
 
   switch ($phase) {
     case 'install':
+      $t = get_t();
+      $path = drupal_get_path('module', 'entityconnect') . '/entityconnect.info';
+      $info = drupal_parse_info_file($path);
+
       $requirements['entityconnect'] = array();
-      $requirements['entityconnect']['title'] = $t('Private filesystem support');
+      $requirements['entityconnect']['title'] = $info['name'];
+      $requirements['entityconnect']['value'] = $info['version'];
 
       if (module_exists('entityreference')) {
         $requirements['entityconnect']['severity'] = REQUIREMENT_OK;
@@ -24,16 +28,13 @@ function entityconnect_requirements($phase) {
         $requirements['entityconnect']['severity'] = REQUIREMENT_OK;
       }
       else {
-        $requirements['entityconnect']['severity'] = REQUIREMENT_ERROR;
+        $requirements['entityconnect']['severity'] = REQUIREMENT_WARNING;
         $requirements['entityconnect']['description'] = $t(
-          'Neither Entityreference nor References modules is installed or activated.
-          Entityconnect need at least one of those modules to work.'
-          );
+          'Neither Entityreference nor References module is installed or activated.
+          Entityconnect needs at least one of those modules to work.'
+        );
       }
 
-      break;
-
-    default:
       break;
   }
 

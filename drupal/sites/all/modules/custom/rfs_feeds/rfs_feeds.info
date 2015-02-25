@@ -1,0 +1,11 @@
+name = Remote File Source Feeds
+description = Add/link external files (urls) without transfering the file locally via feeds.
+core = 7.x
+package = Feeds
+dependencies[] = feeds
+dependencies[] = filefield_sources
+dependencies[] = remote_stream_wrapper
+dependencies[] = remote_file_source
+files[] = includes/RfsFeedsBaseProvider.inc
+files[] = includes/RfsFeedsProvider.inc
+

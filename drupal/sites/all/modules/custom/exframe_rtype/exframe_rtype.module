@@ -57,11 +57,23 @@ function rtype_process_form($form, &$form_state, $node) {
     '#weight' => 30,
     '#submit' => array('rtype_process_delete_isa_form_submit'),
   );
-  $form['actions']['delete'] = array(
+  $form['actions']['run'] = array(
     '#type' => 'submit',
-    '#value' => t('Delete Microarray'),
+    '#value' => t('Run FastQC'),
     '#weight' => 40,
-    '#submit' => array('rtype_process_delete_microarray_form_submit'),
+    '#submit' => array('rtype_process_run_fastqc_form_submit'),
+  );
+  $form['actions']['upload'] = array(
+    '#type' => 'submit',
+    '#value' => t('FastQC Upload'),
+    '#weight' => 50,
+    '#submit' => array('rtype_process_fastqc_upload_form_submit'),
+  );
+  $form['actions']['process'] = array(
+    '#type' => 'submit',
+    '#value' => t('Process RNA-Seq'),
+    '#weight' => 60,
+    '#submit' => array('rtype_process_rna_seq_form_submit'),
   );
   return $form;
 }
@@ -148,27 +160,188 @@ function rtype_process_geo_form_submit($form, &$form_state) {
   // The experiment node is available in $form['#experiment'] if you need it.
   //Get the experiment nid
   $exp_nid = $form['#experiment']->nid;
+  
+  //Must insert a new job into rtype_jobs table
+  $exp_time = format_date(REQUEST_TIME, $type = 'medium', $format = 'Y-m-d H:i:s', $timezone = NULL, $langcode = NULL);
+
+  $job_id = db_insert('rtype_jobs') // Table name no longer needs {}
+->fields(array(
+  'exp_id' => $exp_nid,
+  'job_type' => 1,
+  'status' => 0,
+  'time_submitted' => $exp_time,
+))
+->execute();
+
+  $drupal_root = getcwd();
+  $project_root = dirname($drupal_root);
+  
+  // test script is <path>/scripts/test_call.R 
+  $exec_command = "R CMD BATCH --no-restore --no-save \"--args " .$exp_nid. " " .$job_id. " " .$project_root. "/secure/settings.txt\" " .$project_root. "/scripts/createGEO.R " .$drupal_root. "/sites/default/files/logs/geo_" .$job_id. "_" .$exp_nid. ".txt";
+  
+  //dsm($job_id);
+  //dsm($drupal_root);          // --> /var/www/sccr_project/drupal
+  //dsm($project_root);         // --> /var/www/sccr_project
+  dsm($exec_command);
+  $output = exec($exec_command);
+  if ($output !== NULL) {
+    drupal_set_message('The GEO file R script was executed.');
+  }
+  else {
+    drupal_set_message('Error during GEO file script execution.', 'error');
+  }
 
 }
 
 function rtype_process_delete_isa_form_submit($form, &$form_state) {
+  $exp_nid = $form['#experiment']->nid;
+  $drupal_root = getcwd();
+  $project_root = dirname($drupal_root);
+  $isa_files = array();
+  $isa_jobs = array();
+  
+  // Get existing ISA files
+  // Note: does not return incomplete jobs, despite code below; only those with files
+  // Need additional code to retrieve/delete incomplete jobs?
+  $results_isa = db_query('SELECT j.status, j.job_type, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$exp_nid.' AND (j.job_type = 1 OR j.job_type = 10) AND r.file_type=\'ISA-Tab\'');
+    while($row = $results_isa->fetchAssoc()) { 
+      array_push($isa_jobs, $row['job_id']);
+      if (($row['status'] == '1') && ($row['job_type'] == '1')) {
+          //delete file, but not job, because microarray processing will remain
+          $filename = basename($row['file_path']);
+          $completed_jobs = $completed_jobs + 1; 
+          array_push($isa_files, $filename);
+      }
+      if (($row['status'] == '1') && ($row['job_type'] == '10')) {
+          //delete file and job; isa-tab only here
+          $filename = basename($row['file_path']);
+          $completed_jobs = $completed_jobs + 1;
+          array_push($isa_files, $filename);
+          //$isa_delete = db_delete('rtype_jobs')
+             //->condition('job_id', $row['job_id'])
+             //->execute();
+      }
+      if ($row['status'] != '1') {
+          //incomplete job just delete from rtype_jobs table; no files to delete
+           //$isa_delete = db_delete('rtype_jobs')
+             //->condition('job_id', $row['job_id'])
+             //->execute();
+          $incomplete_jobs = $incomplete_jobs + 1;    
+      }       
+    }
+  
+  dsm($isa_jobs);
+  dsm($completed_jobs);
+  dsm($isa_files);
+  dsm($incomplete_jobs);
+  //$exec_command = "ls";
+  $output = "test";  //exec($exec_command);
+  if ($output !== NULL) {
+    drupal_set_message('The ISA Tab file must be deleted manually; this button not yet fully functional.');
+  }
+  else {
+    drupal_set_message('The ISA Tab file must be deleted manually; this button not yet fully functional.', 'error');
+  }
+}
+
+
+function rtype_process_run_fastqc_form_submit($form, &$form_state) {
   // Execute your mighty R script here.
   // The experiment node is available in $form['#experiment'] if you need it.
   //Get the experiment nid
   $exp_nid = $form['#experiment']->nid;
 
+  $drupal_root = getcwd();
+  $project_root = dirname($drupal_root);
+  
+  //Must insert a new job into rtype_jobs table
+  $exp_time = format_date(REQUEST_TIME, $type = 'medium', $format = 'Y-m-d H:i:s', $timezone = NULL, $langcode = NULL);
+
+  $job_id = db_insert('rtype_jobs') // Table name no longer needs {}
+->fields(array(
+  'exp_id' => $exp_nid,
+  'job_type' => 15,
+  'status' => 0,
+  'time_submitted' => $exp_time,
+))
+->execute();
+  
+  $exec_command = "R CMD BATCH --no-restore --no-save \"--args " .$exp_nid. " " .$job_id. " " .$project_root. "/secure/settings.txt\" " .$project_root. "/scripts/createFastQC.R " .$drupal_root. "/sites/default/files/logs/fastqc_" .$job_id. "_".$exp_nid. ".txt";
+  
+  //dsm($job_id);
+  //dsm($drupal_root);          // --> /var/www/sccr_project/drupal
+  //dsm($project_root);         // --> /var/www/sccr_project
+  dsm($exec_command);
+  $output = exec($exec_command);
+  if ($output !== NULL) {
+    drupal_set_message('The FastQC batch script was created.');
+  }
+  else {
+    drupal_set_message('Error during FastQC batch script creation.', 'error');
+  }  
 }
 
-function rtype_process_delete_microarray_form_submit($form, &$form_state) {
+function rtype_process_fastqc_upload_form_submit($form, &$form_state) {
   // Execute your mighty R script here.
   // The experiment node is available in $form['#experiment'] if you need it.
   //Get the experiment nid
   $exp_nid = $form['#experiment']->nid;
 
+  $drupal_root = getcwd();
+  $project_root = dirname($drupal_root);
+  
+  // test script is <path>/scripts/test_call.R 
+  $exec_command = "R CMD BATCH --no-restore --no-save \"--args " .$exp_nid. " " .$project_root. "/secure/settings.txt\" " .$project_root. "/scripts/uploadFastQC.R " .$drupal_root. "/sites/default/files/logs/rnaseq_upload_" .$exp_nid. ".txt";
+  
+  //dsm($job_id);
+  //dsm($drupal_root);          // --> /var/www/sccr_project/drupal
+  //dsm($project_root);         // --> /var/www/sccr_project
+  dsm($exec_command);
+  $output = exec($exec_command);
+  if ($output !== NULL) {
+    drupal_set_message('The FastQC upload script was executed.');
+  }
+  else {
+    drupal_set_message('Error during FastQC upload script execution.', 'error');
+  }  
 }
 
+function rtype_process_rna_seq_form_submit($form, &$form_state) {
+  // Execute your mighty R script here.
+  // The experiment node is available in $form['#experiment'] if you need it.
+  //Get the experiment nid
+  $exp_nid = $form['#experiment']->nid;
+  
+  //Must insert a new job into rtype_jobs table
+  $exp_time = format_date(REQUEST_TIME, $type = 'medium', $format = 'Y-m-d H:i:s', $timezone = NULL, $langcode = NULL);
 
+  $job_id = db_insert('rtype_jobs') // Table name no longer needs {}
+->fields(array(
+  'exp_id' => $exp_nid,
+  'job_type' => 30,
+  'status' => 0,
+  'time_submitted' => $exp_time,
+))
+->execute();
 
+  $drupal_root = getcwd();
+  $project_root = dirname($drupal_root);
+  
+  // test script is <path>/scripts/test_call.R 
+  $exec_command = "R CMD BATCH --no-restore --no-save \"--args " .$exp_nid. " " .$job_id. " " .$project_root. "/secure/settings.txt\" " .$project_root. "/scripts/createYAML.R " .$drupal_root. "/sites/default/files/logs/yaml_" .$job_id. "_" .$exp_nid. ".txt";
+  
+  //dsm($job_id);
+  //dsm($drupal_root);          // --> /var/www/sccr_project/drupal
+  //dsm($project_root);         // --> /var/www/sccr_project
+  dsm($exec_command);
+  $output = exec($exec_command);
+  if ($output !== NULL) {
+    drupal_set_message('The RNA-Seq processing script was executed.');
+  }
+  else {
+    drupal_set_message('Error during RNA-Seq processing script execution.', 'error');
+  }  
+}
 
 
 
@@ -212,9 +385,7 @@ function _exframe_rtype_data_render($field) {
   //dsm($field);
   $experiment = $field['entity']->nid;
   $measurement_type =  NULL;
-  if (!empty($field['entity']->field_xf_bioassay[LANGUAGE_NONE][0]['entity'])) {
-    $measurement_type = $field['entity']->field_xf_bioassay[LANGUAGE_NONE][0]['entity']->field_xf_measurement_type[LANGUAGE_NONE][0]['tid'];
-  }
+  $measurement_type = $field['entity']->field_xf_measurement_type[LANGUAGE_NONE][0]['tid'];
   //dsm($measurement_type);
  switch ($measurement_type) {
   case '239':
@@ -224,7 +395,7 @@ function _exframe_rtype_data_render($field) {
       while($row = $results_gct->fetchAssoc()) {
         if ($row['status'] == '1') {
             $filename = basename($row['file_path']);
-            $result = '<a href="'.base_path().$row['file_path'].'">'.$filename.'</a> ';
+            $result = '<a href="'.base_path().$row['file_path'].'" target="_blank">'.$filename.'</a> ';
           }else{
             $result = 'Processing in progress...';
           }
@@ -235,7 +406,7 @@ function _exframe_rtype_data_render($field) {
       }
       if(!empty($gct_files)){
         $header = array('Expression Matrix');
-        $output .= '<p>These are the gene expression matrix file(s):</p>';
+        $output .= '<p>These are the gene expression matrix file(s) computed using RMA:</p>';
         $output .= theme('table', array('header' => $header, 'rows' => $gct_files));
       } else {
         $output .= t('<p>No expression matrix files are available for this experiment.</p>');
@@ -250,7 +421,7 @@ function _exframe_rtype_data_render($field) {
 
         //if(access_exp_group_member($experiment)){
           if (!empty($row['status'])) {
-            $result = '<a href="'.base_path().$row['file_path'].'">Download Result</a> ';
+            $result = '<a href="'.base_path().$row['file_path'].'" target="_blank">Download Result</a> ';
           }else{
             $result = 'Processing in progress...';
           }
@@ -277,8 +448,152 @@ function _exframe_rtype_data_render($field) {
     } else {
       $output .= t('<p>No group comparisons are available for this experiment.</p>');
     }
+
+    // Pathprint files
+    $results_path = db_query('SELECT j.status, j.exp_id, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND j.job_type = 1 AND (r.file_type=\'PATHCONSENSUS\' OR r.file_type=\'PATHGEO\' OR r.file_type=\'PATHPRINT\' OR r.file_type=\'PATHSCC\')');
+      while($row = $results_path->fetchAssoc()) {
+        if ($row['status'] == '1') {
+            $filename = basename($row['file_path']);
+            $result = '<a href="'.base_path().$row['file_path'].'" target="_blank">'.$filename.'</a> ';
+          }else{
+            $result = 'Processing in progress...';
+          }
+
+          $path_files[] = array(
+            $result,
+          );
+      }
+      if(!empty($path_files)){
+        $header = array('Pathways Analysis');
+        $output .= '<p>These are the results of pathways analysis using PathPrint:<br>The PathPrint text file contains the pathway activities for this experiment, represented as a -1, 0, or 1 for low, average and high expression, respectively. The GEO and SCC html files contain lists of the most closely related experiments in GEO or the Stem Cell Commons, using the Manhattan distance as a measure of similarity. The Consensus pdf file illustrates how similar the data are to a pluripotent consensus signature that has been generated from a set of pluripotent samples in GEO.</p>';
+        $output .= theme('table', array('header' => $header, 'rows' => $path_files));
+        
+      } else {
+        $output .= t('<p>No pathways analysis is available for this experiment.</p>');
+      }
+    
+    //Array QC Metrics
+    $affyqc_results_path = db_query('SELECT j.status, j.exp_id, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND j.job_type = 1 AND (r.file_type=\'AFFYQC\' OR r.file_type=\'AFFYQC_RAW\')');
+        while($row = $affyqc_results_path->fetchAssoc()) {
+          if ($row['status'] == '1') {    
+            if (preg_match("/raw/i", $row['file_path'])) {
+              $display_name = "QC of raw data";
+            }
+            if (preg_match("/rma/i", $row['file_path'])) {
+              $display_name = "QC of normalized data";
+            }
+            
+            $result = '<a href="'.base_path().$row['file_path'].'" target="_blank">'.$display_name.'</a> ';
+          }else{
+              $result = 'Processing in progress...';
+            }
+
+            $affyqc_path_files[] = array(
+              $result,
+            );
+        }
+        if(!empty($affyqc_path_files)){
+          $header = array('Microarray quality assessment');
+          $output .= '<p>These are the results of ArrayQualityMetrics:</p>';
+          $output .= theme('table', array('header' => $header, 'rows' => $affyqc_path_files));
+        } else {
+          $output .= t('<p>No microarray quality assessment available.</p>');
+        }
+       
     return $output;
     break;
+    
+    // For RNA-Seq, have a fastqc report
+    case '626':
+    
+      $fastqc_results_path = db_query('SELECT j.status, j.exp_id, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND j.job_type = 15 AND r.file_type=\'FASTQC\'');
+        while($row = $fastqc_results_path->fetchAssoc()) {
+          if ($row['status'] == '1') {
+            $unique_path = str_replace("/fastqc_report.html", "", $row['file_path']);
+            $path_parts = pathinfo($unique_path);
+            $display_name = $path_parts['basename'];
+            //dsm($display_name);
+            
+              $result = '<a href="'.base_path().$row['file_path'].'" target="_blank">'.$display_name.'</a> ';
+            }else{
+              $result = 'Processing in progress...';
+            }
+
+            $fastqc_path_files[] = array(
+              $result,
+            );
+        }
+        if(!empty($fastqc_path_files)){
+          $header = array('FastQC Analysis');
+          $output .= '<p>These are the results of FastQC analysis of the fastq files using fastqc-0.10.0.</p>';
+          $output .= theme('table', array('header' => $header, 'rows' => $fastqc_path_files));
+        } else {
+          $output .= t('<p>No preprocessed analysis available.</p>');
+        }
+    	
+    return $output;
+    break;
+     // For ChIP-Seq, have a fastqc report
+    case '240':
+    
+      $fastqc_results_path = db_query('SELECT j.status, j.exp_id, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND j.job_type = 15 AND r.file_type=\'FASTQC\'');
+        while($row = $fastqc_results_path->fetchAssoc()) {
+          if ($row['status'] == '1') {
+            $unique_path = str_replace("/fastqc_report.html", "", $row['file_path']);
+            $path_parts = pathinfo($unique_path);
+            $display_name = $path_parts['basename'];
+            //dsm($display_name);
+            
+              $result = '<a href="'.base_path().$row['file_path'].'" target="_blank">'.$display_name.'</a> ';
+            }else{
+              $result = 'Processing in progress...';
+            }
+
+            $fastqc_path_files[] = array(
+              $result,
+            );
+        }
+        if(!empty($fastqc_path_files)){
+          $header = array('FastQC Analysis');
+          $output .= '<p>These are the results of FastQC analysis of the fastq files using fastqc-0.10.0.</p>';
+          $output .= theme('table', array('header' => $header, 'rows' => $fastqc_path_files));
+        } else {
+          $output .= t('<p>No preprocessed analysis available.</p>');
+        }
+    	
+    return $output;
+    break;
+    
+    case '262':
+    
+      $fastqc_results_path = db_query('SELECT j.status, j.exp_id, j.job_id, r.rf_id, r.file_path FROM rtype_jobs j LEFT JOIN rtype_resultFiles r ON r.job_id = j.job_id WHERE j.exp_id = '.$experiment.' AND j.job_type = 15 AND r.file_type=\'FASTQC\'');
+        while($row = $fastqc_results_path->fetchAssoc()) {
+          if ($row['status'] == '1') {
+            $unique_path = str_replace("/fastqc_report.html", "", $row['file_path']);
+            $path_parts = pathinfo($unique_path);
+            $display_name = $path_parts['basename'];
+            //dsm($display_name);
+            
+              $result = '<a href="'.base_path().$row['file_path'].'" target="_blank">'.$display_name.'</a> ';
+            }else{
+              $result = 'Processing in progress...';
+            }
+
+            $fastqc_path_files[] = array(
+              $result,
+            );
+        }
+        if(!empty($fastqc_path_files)){
+          $header = array('FastQC Analysis');
+          $output .= '<p>These are the results of FastQC analysis of the fastq files using fastqc-0.10.0.</p>';
+          $output .= theme('table', array('header' => $header, 'rows' => $fastqc_path_files));
+        } else {
+          $output .= t('<p>No preprocessed analysis available.</p>');
+        }
+    	
+    return $output;
+    break;
+    
   default:
     $output .= t('<p>No preprocessed analysis available.</p>');
     return $output;

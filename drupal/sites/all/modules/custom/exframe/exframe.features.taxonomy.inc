@@ -13,9 +13,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Biomarkers',
       'machine_name' => 'xf_biomarkers',
       'description' => 'Biomarkers that are not cell surface markers',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -36,9 +36,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Cell Type',
       'machine_name' => 'xf_cell_type',
       'description' => 'Cell types, includes cell lines.',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -59,9 +59,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Cellular Material',
       'machine_name' => 'xf_cellular_material',
       'description' => 'The type of sample molecule or material type.',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -82,9 +82,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Development Stage',
       'machine_name' => 'xf_development_stage',
       'description' => 'Adult, embryo, juvenile',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -105,9 +105,32 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Disease State',
       'machine_name' => 'xf_disease_state',
       'description' => 'Disease',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+    'xf_ethnicity' => array(
+      'name' => 'Ethnicity',
+      'machine_name' => 'xf_ethnicity',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -128,9 +151,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Design Type (Overall Design)',
       'machine_name' => 'xf_experiment_design_type',
       'description' => 'Experiment Design Type',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -151,9 +174,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Immunoprecipitation Antibody',
       'machine_name' => 'xf_immunoprecipitation_antibody',
       'description' => 'Immunoprecipitation Antibody',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -174,9 +197,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Measurement Type',
       'machine_name' => 'xf_measurement_type',
       'description' => 'Includes DNA methylation, histone modification, transcription profiling, etc.',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -197,9 +220,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Microarray Label',
       'machine_name' => 'xf_microarray_label',
       'description' => 'Microarray Label',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -220,9 +243,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Markers -',
       'machine_name' => 'xf_negative_markers',
       'description' => 'Negative cell surface markers',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -243,9 +266,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Organism',
       'machine_name' => 'xf_organism',
       'description' => 'Name of organism',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -266,9 +289,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Platform',
       'machine_name' => 'xf_platform',
       'description' => 'Vendor plus chip or instrument name',
-      'hierarchy' => '1',
+      'hierarchy' => 1,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -289,9 +312,32 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Markers +',
       'machine_name' => 'xf_positive_markers',
       'description' => 'Positive cell surface markers',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+    'xf_race' => array(
+      'name' => 'Race',
+      'machine_name' => 'xf_race',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -312,9 +358,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Strain',
       'machine_name' => 'xf_strain',
       'description' => 'Strain, such as C57BL/6 for mice',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -335,9 +381,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Cell Surface Markers',
       'machine_name' => 'xf_surface_markers',
       'description' => 'Cell Surface Markers',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -358,9 +404,9 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Tissue Type',
       'machine_name' => 'xf_tissue_type',
       'description' => 'Tissue type, such as blood, intestine, liver, kidney, etc.',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',
@@ -381,9 +427,32 @@ function exframe_taxonomy_default_vocabularies() {
       'name' => 'Treatment',
       'machine_name' => 'xf_treatment',
       'description' => 'Treatment, such as urea, estradiol, etc.',
-      'hierarchy' => '0',
+      'hierarchy' => 0,
       'module' => 'taxonomy',
-      'weight' => '0',
+      'weight' => 0,
+      'rdf_mapping' => array(
+        'rdftype' => array(
+          0 => 'skos:ConceptScheme',
+        ),
+        'name' => array(
+          'predicates' => array(
+            0 => 'dc:title',
+          ),
+        ),
+        'description' => array(
+          'predicates' => array(
+            0 => 'rdfs:comment',
+          ),
+        ),
+      ),
+    ),
+    'xf_vector' => array(
+      'name' => 'Vector',
+      'machine_name' => 'xf_vector',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
       'rdf_mapping' => array(
         'rdftype' => array(
           0 => 'skos:ConceptScheme',

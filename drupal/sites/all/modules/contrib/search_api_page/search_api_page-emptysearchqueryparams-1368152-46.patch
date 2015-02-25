@@ -1,0 +1,24 @@
+diff --git a/search_api_page.module b/search_api_page.module
+index 8db9b3c..be4c231 100755
+--- a/search_api_page.module
++++ b/search_api_page.module
+@@ -528,10 +528,17 @@ function search_api_page_search_form_validate(array $form, array &$form_state) {
+  */
+ function search_api_page_search_form_submit(array $form, array &$form_state) {
+   $keys = trim($form_state['values']['keys_' . $form_state['values']['id']]);
+-
+   $keys = strtr($keys, array("\\" => "\\\\", '/' => "\\"));
+ 
+-  $form_state['redirect'] = $form_state['values']['base_' . $form_state['values']['id']] . '/' . $keys;
++  $destination = drupal_get_destination();
++  $url = drupal_parse_url($destination['destination']);
++
++  $form_state['redirect'] = array(
++    $form_state['values']['base_' . $form_state['values']['id']] . '/' . $keys,
++    array(
++      'query' => $url['query'],
++    ),
++  );
+ 
+   // To completely controll the redirect destination, we need to remove the
+   // 'destination' GET parameter, which would override our destination, if

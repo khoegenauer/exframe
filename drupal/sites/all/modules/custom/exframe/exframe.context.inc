@@ -13,6 +13,41 @@ function exframe_context_default_contexts() {
   $context = new stdClass();
   $context->disabled = FALSE; /* Edit this to true to make a default context disabled initially */
   $context->api_version = 3;
+  $context->name = 'scc_profile';
+  $context->description = 'Profile page';
+  $context->tag = '';
+  $context->conditions = array(
+    'user_page' => array(
+      'values' => array(
+        'view' => 'view',
+      ),
+      'options' => array(
+        'mode' => 'all',
+      ),
+    ),
+  );
+  $context->reactions = array(
+    'block' => array(
+      'blocks' => array(
+        'views-exframe_my_experiments-block_1' => array(
+          'module' => 'views',
+          'delta' => 'exframe_my_experiments-block_1',
+          'region' => 'content',
+          'weight' => '5',
+        ),
+      ),
+    ),
+  );
+  $context->condition_mode = 0;
+
+  // Translatables
+  // Included for use with string extractors like potx.
+  t('Profile page');
+  $export['scc_profile'] = $context;
+
+  $context = new stdClass();
+  $context->disabled = FALSE; /* Edit this to true to make a default context disabled initially */
+  $context->api_version = 3;
   $context->name = 'scc_statistics';
   $context->description = 'Statistics page for Stem Cell Commons';
   $context->tag = '';

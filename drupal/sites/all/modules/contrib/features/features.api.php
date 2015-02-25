@@ -61,7 +61,7 @@ function hook_features_api() {
 }
 
 /**
- * Component hook. The hook should be implemented using the name ot the
+ * Component hook. The hook should be implemented using the name of the
  * component, not the module, eg. [component]_features_export() rather than
  * [module]_features_export().
  *
@@ -118,7 +118,7 @@ function hook_features_export($data, &$export, $module_name) {
 }
 
 /**
- * Component hook. The hook should be implemented using the name ot the
+ * Component hook. The hook should be implemented using the name of the
  * component, not the module, eg. [component]_features_export() rather than
  * [module]_features_export().
  *
@@ -137,7 +137,7 @@ function hook_features_export_options() {
 }
 
 /**
- * Component hook. The hook should be implemented using the name ot the
+ * Component hook. The hook should be implemented using the name of the
  * component, not the module, eg. [component]_features_export() rather than
  * [module]_features_export().
  *
@@ -171,7 +171,7 @@ function hook_features_export_render($module_name, $data, $export = NULL) {
 }
 
 /**
- * Component hook. The hook should be implemented using the name ot the
+ * Component hook. The hook should be implemented using the name of the
  * component, not the module, eg. [component]_features_export() rather than
  * [module]_features_export().
  *
@@ -181,6 +181,8 @@ function hook_features_export_render($module_name, $data, $export = NULL) {
  *   The name of the feature module whose components should be reverted.
  * @return boolean
  *   TRUE or FALSE for whether the components were successfully reverted.
+ *   NOTE: This return value is no longer used in the latest Features so
+ *   modules should no longer count on this value
  */
 function hook_features_revert($module_name) {
   $mycomponents = module_invoke($module_name, 'mycomponent_defaults');
@@ -192,7 +194,7 @@ function hook_features_revert($module_name) {
 }
 
 /**
- * Component hook. The hook should be implemented using the name ot the
+ * Component hook. The hook should be implemented using the name of the
  * component, not the module, eg. [component]_features_export() rather than
  * [module]_features_export().
  *
@@ -214,6 +216,42 @@ function hook_features_rebuild($module_name) {
     foreach ($mycomponents as $mycomponent) {
       mycomponent_save($mycomponent);
     }
+  }
+}
+
+/**
+ * Invoked before a restore operation is run.
+ *
+ * This hook is called before any of the restore operations on the components is
+ * run.
+ *
+ * @param string $op
+ *   The operation that is triggered: revert, rebuild, disable, enable
+ * @param array $items
+ *   The items handled by the operation.
+ */
+function hook_features_pre_restore($op, $items) {
+  if ($op == 'rebuild') {
+    // Use features rebuild to rebuild the features independent exports too.
+    entity_defaults_rebuild();
+  }
+}
+
+/**
+ * Invoked after a restore operation is run.
+ *
+ * This hook is called after any of the restore operations on the components is
+ * run.
+ *
+ * @param string $op
+ *   The operation that is triggered: revert, rebuild, disable, enable
+ * @param array $items
+ *   The items handled by the operation.
+ */
+function hook_features_post_restore($op, $items) {
+  if ($op == 'rebuild') {
+    // Use features rebuild to rebuild the features independent exports too.
+    entity_defaults_rebuild();
   }
 }
 
@@ -291,12 +329,32 @@ function hook_features_pipe_alter(&$pipe, $data, $export) {
  */
 
 /**
+ * Deprecated as of 7.x-2.0.
+ *
  * Alter the default fields right before they are cached into the database.
  *
  * @param &$fields
  *   By reference. The fields that have been declared by another feature.
  */
 function hook_field_default_fields_alter(&$fields) {
+}
+
+/**
+ * Alter the base fields right before they are cached into the database.
+ *
+ * @param &$fields
+ *   By reference. The fields that have been declared by another feature.
+ */
+function hook_field_default_field_bases_alter(&$fields) {
+}
+
+/**
+ * Alter the field instances right before they are cached into the database.
+ *
+ * @param &$fields
+ *   By reference. The fields that have been declared by another feature.
+ */
+function hook_field_default_field_instances_alter(&$fields) {
 }
 
 /**
@@ -374,6 +432,99 @@ function hook_user_default_permissions_alter(&$permissions) {
  *   By reference. The roles that have been declared by another feature.
  */
 function hook_user_default_roles_alter(&$roles) {
+}
+
+/**
+ * @}
+ */
+
+
+/**
+ * @defgroup features_module_hooks Feature module hooks
+ * @{
+ * Hooks invoked on Feature modules when that module is enabled, disabled,
+ * rebuilt, or reverted. These are ONLY invoked on the Features module on
+ * which these actions are taken.
+ */
+
+/**
+ * Feature module hook. Invoked on a Feature module before that module is
+ * reverted.
+ *
+ * @param $component
+ *   String name of the component that is about to be reverted.
+ */
+function hook_pre_features_revert($component) {
+}
+
+/**
+ * Feature module hook. Invoked on a Feature module after that module is
+ * reverted.
+ *
+ * @param $component
+ *   String name of the component that has just been reverted.
+ */
+function hook_post_features_revert($component) {
+}
+
+/**
+ * Feature module hook. Invoked on a Feature module before that module is
+ * rebuilt.
+ *
+ * @param $component
+ *   String name of the component that is about to be rebuilt.
+ */
+function hook_pre_features_rebuild($component) {
+}
+
+/**
+ * Feature module hook. Invoked on a Feature module after that module is
+ * rebuilt.
+ *
+ * @param $component
+ *   String name of the component that has just been rebuilt.
+ */
+function hook_post_features_rebuild($component) {
+}
+
+/**
+ * Feature module hook. Invoked on a Feature module before that module is
+ * disabled.
+ *
+ * @param $component
+ *   String name of the component that is about to be disabled.
+ */
+function hook_pre_features_disable_feature($component) {
+}
+
+/**
+ * Feature module hook. Invoked on a Feature module after that module is
+ * disabled.
+ *
+ * @param $component
+ *   String name of the component that has just been disabled.
+ */
+function hook_post_features_disable_feature($component) {
+}
+
+/**
+ * Feature module hook. Invoked on a Feature module before that module is
+ * enabled.
+ *
+ * @param $component
+ *   String name of the component that is about to be enabled.
+ */
+function hook_pre_features_enable_feature($component) {
+}
+
+/**
+ * Feature module hook. Invoked on a Feature module after that module is
+ * enabled.
+ *
+ * @param $component
+ *   String name of the component that has just been enabled.
+ */
+function hook_post_features_enable_feature($component) {
 }
 
 /**

@@ -115,6 +115,7 @@ function restws_format($name) {
  *   One of 'create', 'update', 'delete' or 'view'.
  */
 function restws_handle_request($op, $format, $resource_name, $id = NULL, $payload = NULL) {
+  $message = $status_message = '';
   if ($resource = restws_resource_controller($resource_name)) {
     // Allow other modules to change the web service request or react upon it.
     $request = array(
@@ -134,11 +135,11 @@ function restws_handle_request($op, $format, $resource_name, $id = NULL, $payloa
         $method = $op . 'Resource';
         if ($op == 'create') {
           print $format->$method($resource, $payload);
-          drupal_add_http_header('Status', '201 Created');
+          $status_message = '201 Created';
         }
         elseif ($op == 'query') {
           if (!$resource instanceof RestWSQueryResourceControllerInterface) {
-            throw new RestWSException('Quering not available for this resources', 501);
+            throw new RestWSException('Querying not available for this resource', 501);
           }
           print $format->$method($resource, $payload);
         }
@@ -148,22 +149,20 @@ function restws_handle_request($op, $format, $resource_name, $id = NULL, $payloa
         drupal_add_http_header('Content-Type', $format->mimeType());
       }
       catch (RestWSException $e) {
-        echo check_plain($e->getHTTPError()) . ': ' . check_plain($e->getMessage());
-        drupal_add_http_header('Status', $e->getHTTPError());
+        $message = check_plain($e->getHTTPError()) . ': ' . check_plain($e->getMessage());
+        $status_message = $e->getHTTPError();
       }
     }
     else {
-      echo '403 Forbidden';
-      drupal_add_http_header('Status', '403 Forbidden');
+      $status_message = $message = '403 Forbidden';
       watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
     }
   }
   else {
-    echo '404 Not Found';
-    drupal_add_http_header('Status', '404 Not Found');
+    $status_message = $message = '404 Not Found';
   }
-  drupal_page_footer();
-  exit;
+
+  restws_terminate_request($status_message, $message);
 }
 
 /**
@@ -174,12 +173,16 @@ class RestWSException extends Exception {
   public function getHTTPError() {
     $code = $this->getCode();
     switch ($code) {
+      case 403:
+        return '403 Forbidden';
       case 404:
         return '404 Not Found';
       case 406:
         return '406 Not Acceptable';
       case 412:
         return '412 Precondition Failed';
+      case 422:
+        return '422 Unprocessable Entity';
       default:
         return '500 Internal Server Error';
     }
@@ -263,17 +266,21 @@ function restws_menu_alter(&$items) {
  * Menu page callback.
  */
 function restws_page_callback($resource, $page_callback = NULL) {
-  $id_arg = arg(1);
-  $resource_arg = arg(0);
+  // Determine the position of the resource and resource id in the path.
+  $resource_info = restws_get_resource_info($resource);
+  $resource_pos = isset($resource_info['menu_path']) ? count(explode('/', $resource_info['menu_path'])) - 1 : 0;
+
+  $id_arg = arg($resource_pos + 1);
+  $resource_arg = arg($resource_pos);
   $format = FALSE;
   $id = NULL;
   // Check for an appended .format string on GET requests only to avoid CSRF
   // attacks on POST requests.
-  if ($_SERVER['REQUEST_METHOD'] == 'GET' && ($pos = strpos($id_arg, '.')) && $format_name = substr($id_arg, $pos + 1)) {
+  if ($_SERVER['REQUEST_METHOD'] == 'GET' && ($pos = strrpos($id_arg, '.')) && $format_name = substr($id_arg, $pos + 1)) {
     $id = substr($id_arg, 0, $pos);
     $format = restws_format($format_name);
   }
-  elseif ($_SERVER['REQUEST_METHOD'] == 'GET' && ($pos = strpos($resource_arg, '.')) && $format_name = substr($resource_arg, $pos + 1)) {
+  elseif ($_SERVER['REQUEST_METHOD'] == 'GET' && ($pos = strrpos($resource_arg, '.')) && $format_name = substr($resource_arg, $pos + 1)) {
     $format = restws_format($format_name);
   }
   else {
@@ -305,6 +312,15 @@ function restws_page_callback($resource, $page_callback = NULL) {
           $parts = explode(',', $_SERVER['HTTP_ACCEPT'], 2);
           $format = restws_format_mimetype($parts[0]);
         }
+        // Consumers should not use this URL if page caching is enabled.
+        // Drupal's page cache IDs are only determined by URL path, so this
+        // could poison the HTML page cache. A browser request to /node/1 could
+        // suddenly return JSON if the cache was primed with this RESTWS
+        // response.
+        if ($format && !isset($_COOKIE[session_name()]) && variable_get('cache')) {
+          // Redirect to the URL path containing the format name instead.
+          drupal_goto($_GET['q'] . '.' . $format->getName(), array(), 301);
+        }
     }
   }
   if ($format) {
@@ -332,10 +348,7 @@ function restws_page_callback($resource, $page_callback = NULL) {
 
     // CSRF protection on write operations.
     if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD', 'OPTIONS', 'TRACE')) && !restws_csrf_validation()) {
-      echo '403 Access Denied: CSRF validation failed';
-      drupal_add_http_header('Status', '403 Forbidden');
-      drupal_page_footer();
-      exit;
+      restws_terminate_request('403 Forbidden', '403 Access Denied: CSRF validation failed');
     }
 
     $payload = file_get_contents('php://input');
@@ -359,10 +372,7 @@ function restws_page_callback($resource, $page_callback = NULL) {
     $args = func_get_args();
     return call_user_func_array($page_callback, array_slice($args, 2));
   }
-  echo '404 Not Found';
-  drupal_add_http_header('Status', '404 Not Found');
-  drupal_page_footer();
-  exit;
+  restws_terminate_request('404 Not Found');
 }
 
 /**
@@ -435,13 +445,15 @@ function restws_module_implements_alter(&$implementations, $hook) {
  * Return all available meta controls.
  */
 function restws_meta_controls() {
-  return array(
+  $controls = array(
     'sort' => 'sort',
     'direction' => 'direction',
     'page' => 'page',
     'limit' => 'limit',
     'full' => 'full',
   );
+  drupal_alter('restws_meta_controls', $controls);
+  return $controls;
 }
 
 /**
@@ -479,4 +491,24 @@ function restws_session_token() {
   drupal_add_http_header('Content-Type', 'text/plain');
   print drupal_get_token('restws');
   drupal_exit();
+}
+
+/**
+ * Terminates the current request with the given status code and message.
+ *
+ * @param $status_message
+ *   (optional) The status message (including the status code) to return via the
+ *   HTTP Status header.
+ * @param $message
+ *   (optional) A message displayed as body of the response.
+ */
+function restws_terminate_request($status_message = NULL, $message = NULL) {
+  if (!empty($message)) {
+    echo $message;
+  }
+  if (!empty($status_message)) {
+    drupal_add_http_header('Status', $status_message);
+  }
+  drupal_page_footer();
+  exit;
 }

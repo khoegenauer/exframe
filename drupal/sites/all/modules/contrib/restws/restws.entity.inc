@@ -154,13 +154,6 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
   }
 
   public function create(array $values) {
-    try {
-      $wrapper = entity_property_values_create_entity($this->entityType, $values);
-    }
-    catch (EntityMetadataWrapperException $e) {
-      throw new RestWSException($e->getMessage(), 406);
-    }
-
     // Make sure that bundle information is present on entities that have
     // bundles.
     $entity_info = entity_get_info($this->entityType);
@@ -170,6 +163,27 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
           throw new RestWSException('Missing bundle: ' . $bundle_key, 406);
         }
       }
+    }
+
+    try {
+      $wrapper = entity_property_values_create_entity($this->entityType, $values);
+      // Get the ID and bundle property names.
+      $entity_keys = array_intersect_key($entity_info['entity keys'], array('id' => 1, 'bundle' => 1));
+
+      foreach (array_keys($values) as $name) {
+        // Don't check access on entity keys for new entities. Otherwise,
+        // property access checks will fail for, e.g., node type, which
+        // requires the 'administer nodes' permission to set.
+        // @see entity_metadata_node_entity_property_info().
+        if (!in_array($name, $entity_keys)) {
+          if (!$this->checkPropertyAccess($wrapper, $name, $wrapper->{$name})) {
+            throw new RestWSException(t('Not authorized to set property @p', array('@p' => $name)), 403);
+          }
+        }
+      }
+    }
+    catch (EntityMetadataWrapperException $e) {
+      throw new RestWSException($e->getMessage(), 406);
     }
 
     $properties = $wrapper->getPropertyInfo();
@@ -183,9 +197,23 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
 
   public function update($id, array $values) {
     $wrapper = $this->wrapper($id);
+    $entity_info = $wrapper->entityInfo();
+    // Get the ID and bundle property names.
+    $entity_keys = array_intersect_key($entity_info['entity keys'], array('id' => 1, 'bundle' => 1));
     try {
       foreach ($values as $name => $value) {
-        $wrapper->{$name}->set($value);
+        if (in_array($name, $entity_keys)) {
+          // We don't allow changing the entity ID or bundle.
+          if ($wrapper->{$name}->value() != $value) {
+            throw new RestWSException('Unable to change ' . $name, 422);
+          }
+        }
+        else {
+          $wrapper->{$name}->set($value);
+          if (!$this->checkPropertyAccess($wrapper, $name, $wrapper->{$name})) {
+            throw new RestWSException(t('Not authorized to set property @p', array('@p' => $name)), 403);
+          }
+        }
       }
     }
     catch (EntityMetadataWrapperException $e) {
@@ -206,7 +234,7 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
     $offset = 0;
 
     $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', $this->resource());
+    $query->entityCondition('entity_type', $this->entityType);
 
     foreach ($filters as $filter => $value) {
       $this->propertyQueryOperation($query, 'Condition', $filter, $value);
@@ -216,7 +244,12 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
     foreach ($meta_controls as $control_name => $value) {
       switch ($control_name) {
         case $rest_controls['sort']:
-          $direction = isset($meta_controls[$rest_controls['direction']]) ? $meta_controls[$rest_controls['direction']] : 'ASC';
+          if (isset($meta_controls[$rest_controls['direction']]) && strtolower($meta_controls[$rest_controls['direction']]) == 'desc') {
+            $direction = 'DESC';
+          }
+          else {
+            $direction = 'ASC';
+          }
           $this->propertyQueryOperation($query, 'OrderBy', $value, $direction);
           break;
 
@@ -241,9 +274,9 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
       $query_result = $query->execute();
     }
     catch (PDOException $exception) {
-      throw new RestWSException($exception->getMessage(), 412);
+      throw new RestWSException('Query failed.', 400);
     }
-    $query_result = isset($query_result[$this->resource()]) ? $query_result[$this->resource()] : array();
+    $query_result = isset($query_result[$this->entityType]) ? $query_result[$this->entityType] : array();
 
     $result = array_keys($query_result);
 
@@ -256,7 +289,7 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
    */
   public function count($filters = array()) {
     $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', $this->resource());
+    $query->entityCondition('entity_type', $this->entityType);
 
     foreach ($filters as $filter => $value) {
       $this->propertyQueryOperation($query, 'Condition', $filter, $value);
@@ -351,5 +384,49 @@ class RestWSEntityResourceController implements RestWSQueryResourceControllerInt
         $query->$operation($field_info, $column, $value);
       }
     }
+  }
+
+  /**
+   * Helper method to check access on a property.
+   *
+   * @todo Remove this once Entity API properly handles text format access.
+   *
+   * @param EntityMetadataWrapper $entity
+   *   The parent entity.
+   * @param string $property_name
+   *   The property name on the entity.
+   * @param EntityMetadataWrapper $property
+   *   The property whose access is to be checked.
+   *
+   * @return bool
+   *   TRUE if the current user has access to set the property, FALSE otherwise.
+   */
+  protected function checkPropertyAccess($entity, $property_name, $property) {
+    global $user;
+    // Special case node author: we allow access if set to the current user.
+    if ($entity->type() == 'node' && $property_name == 'author' && $property->raw() == $GLOBALS['user']->uid) {
+      return TRUE;
+    }
+    // @todo Hack to check format access for text fields. Should be removed once
+    // this is handled properly on the Entity API level.
+    elseif ($property->type() == 'text_formatted' && $property->format->value()) {
+      $format = (object) array('format' => $property->format->value());
+      if (!filter_access($format)) {
+        return FALSE;
+      }
+    }
+    // We don't want the property wrapper to check access again on the parent
+    // entity so we directly check access for the property. That way only the
+    // pure property/field access is taken into account.
+    $info = $property->info();
+    if (!empty($info['access callback'])) {
+      global $user;
+      $data = $entity->value();
+      return call_user_func($info['access callback'], 'edit', $property_name, $data, $user, $entity->type());
+    }
+    elseif (isset($info['setter permission'])) {
+      return user_access($info['setter permission']);
+    }
+    return TRUE;
   }
 }

@@ -42,12 +42,7 @@
  * @see theme_field()
  */
 ?>
-<!--
-THIS FILE IS NOT USED AND IS HERE AS A STARTING POINT FOR CUSTOMIZATION ONLY.
-See http://api.drupal.org/api/function/theme_field/7 for details.
-After copying this file to your theme's folder and customizing it, remove this
-HTML comment.
--->
+
 <div class="<?php print $classes; ?>"<?php print $attributes; ?>>
   <div class="exframe-bioassay-description">The following section lists the samples for this experiment, grouped by replicates. Click the triangle to view the details for each group.</div>
   <table id="exframe-bioassay-table" class="field-items">
@@ -64,14 +59,18 @@ HTML comment.
     <th class="exframe-cell exframe-ctype">
       Cell type
     </th>
-    <th class="exframe-cell exframe-mtype">
-      Measurement type
+     <th class="exframe-cell exframe-disease">
+      Disease state
     </th>
     <th class="exframe-cell exframe-platform">
       Platform
     </th>
     <th class="exframe-cell exframe-rcount">
       Replicates
+    </th>
+    <th class="exframe-cell exframe-rcount">
+    </th>
+    <th class="exframe-cell exframe-rcount">
     </th>
   </tr>
   </thead>

@@ -267,3 +267,21 @@ function entityconnect_field_instance_settings_form($field, $instance) {
   );
   return $form;
 }
+
+/**
+* Implements hook_module_implements_alter().
+*
+* Ensure entityconnect gets called after workbench_moderation when altering the node form
+*
+* @param array $module_list
+* @param string $context
+*/
+function entityconnect_module_implements_alter(&$module_list, $context) {
+  // need to override both to get correct sort order see http://api.drupal.org/api/drupal/modules%21system%21system.api.php/funct...
+  if($context == 'form_node_form_alter' || $context == 'form_alter') {
+    // move entityconnect implementation to the end of the list to ensure it gets called last
+    $group = isset($module_list['entityconnect'])? $module_list['entityconnect']: FALSE;
+    unset($module_list['entityconnect']);
+    $module_list['entityconnect'] = $group;
+  }
+}

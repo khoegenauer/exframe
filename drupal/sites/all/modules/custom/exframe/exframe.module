@@ -8,6 +8,13 @@ include_once 'exframe.features.inc';
 
 include_once 'exframe.entity_rdf.inc';
 
+/* Instead using module configuration
+function exframe_menu_alter(&$items) {
+   //Remove the Clone link from the site. Only allow direct access.
+   $items['node/%node/clone']['type'] = MENU_LOCAL_TASK; 
+ }
+*/
+
 /**
  * Implements hook_menu().
  */
@@ -21,8 +28,23 @@ $items['admin/config/system/exframe'] = array(
     'file' => 'exframe.admin.inc',
     'weight' => 20,
   );
+  $items['admin/config/system/exframe/query/filesize'] = array(
+    'title' => 'eXframe query',
+    'description' => 'Script to alter filesize column in file_managed table.',
+    'page callback' => 'exframe_query_filesize',
+    'access arguments' => array('administer site configuration'),
+    'weight' => 20,
+  );
   return $items;
 }
+
+//Query function
+function exframe_query_filesize(){
+	db_query("alter table {file_managed} modify filesize bigint(30)");
+	drupal_set_message('filesize field changed to bigint(30)');
+	drupal_goto('admin/config/system/exframe');
+}
+
 
 /**
  * Implements hook_rdf_namespaces().
@@ -75,7 +97,7 @@ function exframe_taxonomy_term_presave($term) {
  * Implements MODULE_preprocess_HOOK().
  */
 function exframe_preprocess_node(&$vars) {
-//dsm($vars);
+
   if (!empty($vars['node']) && $vars['node']->type == 'xf_bioassay') {
     // Specific CSS rules for the bioassays display.
     drupal_add_css(drupal_get_path('module', 'exframe') . '/exframe.css');
@@ -87,6 +109,7 @@ function exframe_preprocess_node(&$vars) {
     // Find all tids of organism and cell types used throughout the replicates.
     $organism_tids = array();
     $cell_type_tids = array();
+    $disease_state_tids = array();
     if (!empty($node->field_xf_replicate[LANGUAGE_NONE])) {
       foreach ($node->field_xf_replicate[LANGUAGE_NONE] as $item) {
         $rep = entity_load('field_collection_item', array($item['value']));
@@ -100,6 +123,11 @@ function exframe_preprocess_node(&$vars) {
             if (!empty($biomaterial['entity']->field_xf_cell_type[LANGUAGE_NONE])) {
               foreach ($biomaterial['entity']->field_xf_cell_type[LANGUAGE_NONE] as $tid) {
                 $cell_type_tids[] = $tid['tid'];
+              }
+            }
+            if (!empty($biomaterial['entity']->field_xf_disease_state[LANGUAGE_NONE])) {
+              foreach ($biomaterial['entity']->field_xf_disease_state[LANGUAGE_NONE] as $tid) {
+                $disease_state_tids[] = $tid['tid'];
               }
             }
           }
@@ -117,7 +145,7 @@ function exframe_preprocess_node(&$vars) {
     }
     $vars['content']['organisms'] = array('#markup' => implode(', ', $organism_labels));
 
-    // and cell types.
+    // and cell types
     $cell_type_tids = array_unique($cell_type_tids);
     $cell_type_labels = array();
     foreach ($cell_type_tids as $tid) {
@@ -125,6 +153,17 @@ function exframe_preprocess_node(&$vars) {
       $cell_type_labels[] = $term[$tid]->name;
     }
     $vars['content']['cell_types'] = array('#markup' => implode(', ', $cell_type_labels));
+
+    // and disease state.
+    $disease_state_tids = array_unique($disease_state_tids);
+    $disease_state_labels = array();
+    foreach ($disease_state_tids as $tid) {
+      $term = entity_load('taxonomy_term', array($tid));
+      $disease_state_labels[] = $term[$tid]->name;
+    }
+    if (!empty($disease_state_labels)) {
+      $vars['content']['disease_state'] = array('#markup' => implode(', ', $disease_state_labels));
+    }
 
     // Compute replicate count in tpl variable.
     if (!empty($node->field_xf_replicate[LANGUAGE_NONE])) {
@@ -348,6 +387,88 @@ function exframe_common_groups($experiment) {
   return array();
 }
 
+/**
+ * Implements hook_node_access().
+ */
+function exframe_node_access($node, $op, $account) {
+  // Experiments are already access controlled via both the node status and OG.
+  // Bioassays and biomaterials are access controlled below based on the
+  // experiment they belong to.
+  // Only perform access control on nodes, not on node types.
+  if (is_object($node) && in_array($node->type, array('xf_bioassay', 'xf_biomaterial'))) {
+    $experiment = _exframe_get_parent_experiment($node);
+    // Deny access if no experiment was returned or if explicit node_access is
+    // denied.
+    if (!$experiment || !node_access('view', $experiment)) {
+      return NODE_ACCESS_DENY;
+    }
+  }
+}
+
+/**
+ * Helper function to find the experiment a given entity belongs to.
+ *
+ * @param $entity
+ *   A node or field_collection_item entity.
+ *
+ * @return object
+ *   The experiment this entity belongs too, or NULL if the user does not have
+ *   access to the experiment entity.
+ */
+function _exframe_get_parent_experiment($entity) {
+  // Entity is a node.
+  if (is_object($entity) && $entity instanceof stdClass && !empty($entity->type)) {
+    $node = $entity;
+    switch ($node->type) {
+      case 'xf_bioassay':
+        return _exframe_get_bioassay_experiment($node);
+        break;
+
+      case 'xf_biomaterial':
+        // EFQ to find the experiment this biomaterial belongs to.
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'field_collection_item')
+          ->fieldCondition('field_xf_replicate_biomaterial', 'target_id', $node->nid, '=');
+        if ($result = $query->execute()) {
+          $replicate = field_collection_item_load(current($result['field_collection_item'])->item_id);
+          if ($bioassay = $replicate->hostEntity()) {
+            return _exframe_get_bioassay_experiment($bioassay);
+          }
+        }
+        break;
+
+      default:
+        return NULL;
+    }
+  }
+}
+
+/**
+ * Helper function to find the experiment a given bioassay belongs to.
+ *
+ * @param $bioassay
+ *   A bioassay node.
+ *
+ * @return object
+ *   The experiment this bioassay belongs too, or NULL if the user does not have
+ *   access to the experiment entity.
+ */
+function _exframe_get_bioassay_experiment($bioassay) {
+  if (is_object($bioassay) && $bioassay instanceof stdClass && $bioassay->type == 'xf_bioassay') {
+    // EFQ to find the experiment this bioassay belongs to.
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', 'xf_experiment')
+      ->fieldCondition('field_xf_bioassay', 'target_id', $bioassay->nid, '=');
+    $result = $query->execute();
+    if (!empty($result['node'])) {
+      return node_load(current($result['node'])->nid);
+    }
+  }
+  else {
+    return NULL;;
+  }
+}
 
 /**
  * Implementation of hook_field_access().
@@ -378,6 +499,7 @@ function exframe_field_access($op, $field, $entity_type, $entity, $account) {
         $experiment = $entity->hostEntity();
         break;
       case 'xf_bioassay':
+        // @todo replace this code with _exframe_get_bioassay_experiment().
         // EFQ to find experiment this bioassay belongs to.
         $query = new EntityFieldQuery();
         $query->entityCondition('entity_type', 'node')
@@ -477,3 +599,30 @@ function exframe_get_isatab_file($id) {
           }
   return $output;
 }
+
+function exframe_node_insert($node){
+		if($node->clone_from_original_nid && $node->type == 'xf_bioassay'){
+	    /* Set experiment parent when cloning */
+	    $original = node_load($node->clone_from_original_nid);
+	    $experiment = _exframe_get_bioassay_experiment($original);
+	    $experiment->field_xf_bioassay[LANGUAGE_NONE][]=array('target_id'=>$node->nid);
+	    node_save($experiment);
+	    $_GET['destination'] = 'node/' . $experiment->nid;
+		}
+}
+
+/*
+function exframe_form_alter(&$form, &$form_state, $form_id){
+	//drupal_set_message($form_id);
+   if ($form_id == "xf_bioassay_node_form") {
+      $form['actions']['submit']['#submit'][] = 'exframe_node_clone_submit_redirect';
+      //$form['#submit'][] = 'exframe_node_clone_submit_redirect';
+   }
+}
+function exframe_node_clone_submit_redirect ($form, &$form_state) {
+	dpm($form['#node']);
+	$obj = $form['#node'];
+   dpm(_exframe_get_bioassay_experiment($obj));
+   $form_state['redirect'] = 'noderdoo';
+}
+*/

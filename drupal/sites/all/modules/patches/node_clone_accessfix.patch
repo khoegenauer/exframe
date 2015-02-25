@@ -1,0 +1,19 @@
+diff --git a/drupal/sites/all/modules/contrib/node_clone/clone.module b/drupal/sites/all/modules/contrib/node_clone/clone.module
+index 81eef6e..0c06c4c 100644
+--- a/drupal/sites/all/modules/contrib/node_clone/clone.module
++++ b/drupal/sites/all/modules/contrib/node_clone/clone.module
+@@ -79,8 +79,12 @@ function clone_access_cloning($node, $check_token = FALSE, $token = FALSE) {
+   $access = clone_is_permitted($node->type) && (user_access('clone node') || ($user->uid && ($node->uid == $user->uid) && user_access('clone own nodes')));
+   // Make sure the user can view the original node content, and create a new one..
+   $access = $access && node_access('view', $node) && node_access('create', $node->type);
+-  // Let other modules alter this.
+-  drupal_alter("clone_access", $access, $node);
++  // Let other modules alter this. (Do not use $access since most hook_access implementations do not return true or false, use NODE_ACCESS_XXXXX)
++  $access_hook = NODE_ACCESS_IGNORE;
++  drupal_alter("clone_access", $access_hook, $node);
++  if($access_hook == NODE_ACCESS_DENY){
++	  return false;
++  }
+   return $access;
+ }
+ 

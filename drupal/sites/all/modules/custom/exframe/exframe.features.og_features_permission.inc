@@ -107,8 +107,8 @@ function exframe_og_features_default_permissions() {
   // Exported og permission: 'node:xf_group:update own xf_experiment content'
   $permissions['node:xf_group:update own xf_experiment content'] = array(
     'roles' => array(
-      'member' => 'member',
       'administrator member' => 'administrator member',
+      'member' => 'member',
     ),
   );
 

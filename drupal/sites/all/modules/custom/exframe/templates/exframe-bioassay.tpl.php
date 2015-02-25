@@ -93,8 +93,8 @@
     <td class="exframe-cell exframe-ctype">
       <?php print render($content['cell_types']); ?>
     </td>
-    <td class="exframe-cell exframe-mtype">
-      <?php print render($content['field_xf_measurement_type']); ?>
+    <td class="exframe-cell exframe-disease">
+      <?php print render($content['disease_state']); ?>
     </td>
     <td class="exframe-cell exframe-platform">
       <?php print render($content['field_xf_platform']); ?>
@@ -106,7 +106,10 @@
         if (user_access('administer nodes') || node_access('update', $node)) { 
           print "<a href=\"";
           print url('node/' . $node->nid . '/edit'); 
-          print "\">edit</a>";
+          print "\">edit</a><br>";
+          print "<a href=\"";
+          print url('node/' . $node->nid . '/clone/confirm'); 
+          print "\">copy</a>";
         }
       ?> 
     </td>

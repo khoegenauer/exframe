@@ -1,0 +1,66 @@
+***************
+*** 30,37 ****
+      $ret['form'] = drupal_get_form('search_api_page_search_form', $page, $keys);
+    }
+  
+-   // Do a search if we have keys, or our empty behavior and facets dictate.
+-   if ($keys || $page->options['empty_behavior'] == 'results' || ($page->options['empty_behavior'] == 'blocks' && !empty($_GET['f']))) {
+      try {
+        $results = search_api_page_search_execute($page, $keys);
+      }
+--- 30,36 ----
+      $ret['form'] = drupal_get_form('search_api_page_search_form', $page, $keys);
+    }
+  
++   if ($keys) {
+      try {
+        $results = search_api_page_search_execute($page, $keys);
+      }
+***************
+*** 114,120 ****
+   * @return array
+   *   The search results as returned by SearchApiQueryInterface::execute().
+   */
+- function search_api_page_search_execute(Entity $page, $keys = '') {
+    $limit = $page->options['per_page'];
+    $offset = pager_find_page() * $limit;
+    $options = array(
+--- 109,115 ----
+   * @return array
+   *   The search results as returned by SearchApiQueryInterface::execute().
+   */
++ function search_api_page_search_execute(Entity $page, $keys) {
+    $limit = $page->options['per_page'];
+    $offset = pager_find_page() * $limit;
+    $options = array(
+***************
+*** 136,157 ****
+  }
+  
+  /**
+-  * Executes an empty search.
+-  *
+-  * @param Entity $page
+-  *   The page for which a search should be executed.
+-  */
+- function search_api_page_search_execute_empty_search(Entity $page) {
+-   $options = array(
+-     'search id' => 'search_api_page:' . $page->path,
+-     'parse mode' => $page->options['mode'],
+-   );
+-   $query = search_api_query($page->index_id, $options)
+-     ->range(0, 0);
+-   $query->execute();
+- }
+- 
+- /**
+   * Function for preprocessing the variables for the search_api_page_results
+   * theme.
+   *
+--- 131,136 ----
+  }
+  
+  /**
+   * Function for preprocessing the variables for the search_api_page_results
+   * theme.
+   *

@@ -364,6 +364,9 @@ function exframe_strongarm() {
       'token' => array(
         'custom_settings' => FALSE,
       ),
+      'diff_standard' => array(
+        'custom_settings' => FALSE,
+      ),
     ),
     'extra_fields' => array(
       'form' => array(
@@ -398,6 +401,9 @@ function exframe_strongarm() {
         'custom_settings' => FALSE,
       ),
       'token' => array(
+        'custom_settings' => FALSE,
+      ),
+      'diff_standard' => array(
         'custom_settings' => FALSE,
       ),
     ),
@@ -523,21 +529,21 @@ function exframe_strongarm() {
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'node_preview_xf_bioassay';
-  $strongarm->value = '1';
+  $strongarm->value = '0';
   $export['node_preview_xf_bioassay'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'node_preview_xf_biomaterial';
-  $strongarm->value = '1';
+  $strongarm->value = '0';
   $export['node_preview_xf_biomaterial'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
   $strongarm->name = 'node_preview_xf_experiment';
-  $strongarm->value = '1';
+  $strongarm->value = '0';
   $export['node_preview_xf_experiment'] = $strongarm;
 
   $strongarm = new stdClass();

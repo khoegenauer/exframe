@@ -1,0 +1,2 @@
+# List of core patches
+http://drupal.org/node/1008402#comment-6062750 Allow the use of symlinks within the files directory.

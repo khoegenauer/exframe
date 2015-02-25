@@ -45,7 +45,7 @@ Drupal.behaviors.exframeTaxonomyTreeTotals = {
 Drupal.behaviors.exframeTaxonomyTree = {
   attach: function (context) {
     $('.exframe-taxonomy-tree li ul').hide();
-      $('.exframe-taxonomy-tree li').each(function (index) {
+    $('.exframe-taxonomy-tree li').each(function (index) {
           var currentLi = $(this);
           var hasChildren = !currentLi.children('.item-list').length == 0;
           //console.log(currentLi.children('.item-list').length);
@@ -71,7 +71,7 @@ Drupal.behaviors.exframeTaxonomyTree = {
                   return false;
               }
           });
-      });
+    });
   }
 };
 
@@ -100,5 +100,22 @@ Drupal.behaviors.exframeAnalyzeSpinner = {
     });
   }
 };
+
+Drupal.behaviors.exframeHideEmptyColumns = {
+  attach: function (context) {
+    var remove = 0;
+    $('#exframe-bioassay-table tr.exframe-bioassay-summary-row').each(function (index) {
+      if (!($(this).children('.exframe-disease').text().replace(/\s/g,"") == "")){
+        remove++;
+      }
+    });
+    //console.log(remove);
+    if (remove == 0) {
+      $('#exframe-bioassay-table tr.exframe-bioassay-summary-row .exframe-disease').hide();
+      $('#exframe-bioassay-table th.exframe-disease').hide();
+    }
+  }
+};
+
 
 })(jQuery);

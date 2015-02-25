@@ -56,11 +56,14 @@ function scc_breadcrumb($variables) {
  * Custom breadcrumb generator
 */
 function scc_get_breadcrumb($variables) {
+
   $breadcrumbs = drupal_get_breadcrumb();
-  $breadcrumbs_copy = $breadcrumbs; //Keep a copy for some usecases
+  //$breadcrumbs_copy = $breadcrumbs; //Keep a copy for some usecases
   $obj = menu_get_object();
+  /*
   $path = (empty($obj)) ? $_GET['q'] : drupal_lookup_path('alias', $_GET['q']);
   $sections = explode("/",$path);
+  
   $segment = '';
   $breadcrumb_mappings = array(
     //Browse
@@ -78,11 +81,53 @@ function scc_get_breadcrumb($variables) {
       }
     }
   }
+*/
+
+	if(!empty($obj) && ($obj->type == 'xf_biomaterial' || $obj->type == 'xf_bioassay')) {
+  	$parent = _exframe_get_parent_experiment($obj);
+  	$exp_url = drupal_get_path_alias('/node/'.$parent->nid);
+		$breadcrumbs[] = '<a href="'.$exp_url.'">'.$parent->title.'</a>';
+  }
 
   //Add Node title to breadcrumb as it is currently empty
   if(!empty($obj) && isset($obj->title)) {
-    $breadcrumbs[count($breadcrumbs)] = l($obj->title, $path);
+    $breadcrumbs[count($breadcrumbs)] = $obj->title;
   }
+  
+  
+  
   return $breadcrumbs;
 }
 
+
+function scc_file_link($variables) {
+  $file = $variables['file'];
+  $icon_directory = $variables['icon_directory'];
+
+	if('ftp'==substr($file->uri,0,3)){
+		$url = $file->uri;
+	}else{
+		$url = file_create_url($file->uri);
+	}
+  
+  $icon = theme('file_icon', array('file' => $file, 'icon_directory' => $icon_directory));
+
+  // Set options as per anchor format described at
+  // http://microformats.org/wiki/file-format-examples
+  $options = array(
+    'attributes' => array(
+      'type' => $file->filemime . '; length=' . $file->filesize,
+    ),
+  );
+
+  // Use the description as the link text if available.
+  if (empty($file->description)) {
+    $link_text = $file->filename;
+  }
+  else {
+    $link_text = $file->description;
+    $options['attributes']['title'] = check_plain($file->filename);
+  }
+
+  return '<span class="file">' . $icon . ' ' . l($link_text, $url, $options) . '</span>';
+}

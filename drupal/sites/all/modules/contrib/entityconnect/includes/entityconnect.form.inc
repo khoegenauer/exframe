@@ -60,11 +60,29 @@ function _entityconnect_field_attach_form($entity_type, $entity, &$form, &$form_
       $views = views_get_view($name);
       $views_display = $views->display;
 
-      if (isset($views_display[$display]->display_options['filters']['type'])) {
-        $acceptable_types = $views_display[$display]->display_options['filters']['type']['value'];
-      }
-      else {
-        $acceptable_types = $views_display['default']->display_options['filters']['type']['value'];
+      switch ($entity_type) {
+        case 'node':
+          if (isset($views_display[$display]->display_options['filters']['type'])) {
+            $acceptable_types = $views_display[$display]->display_options['filters']['type']['value'];
+          }
+          elseif (isset($views_display['default']->display_options['filters']['type']['value'])) {
+            $acceptable_types = $views_display['default']->display_options['filters']['type']['value'];
+          }
+           // $acceptable_types was already set to NULL before
+          break;
+
+        case 'taxonomy_vocabulary':
+          if (isset($views_display[$display]->display_options['filters']['machine_name']['table'])
+                && $views_display[$display]->display_options['filters']['machine_name']['table'] == 'taxonomy_vocabulary' ) {
+            $acceptable_types = $views_display[$display]->display_options['filters']['machine_name']['value'];
+          }
+          elseif (isset($views_display['default']->display_options['filters']['machine_name']['value'])) {
+            $acceptable_types = $views_display['default']->display_options['filters']['machine_name']['value'];
+          }
+          break;
+        
+        default:
+          break;
       }
     }
   }
@@ -582,7 +600,9 @@ function entityconnect_return_form_alter(&$form, &$form_state, $form_id, $cache_
         default:
           break;
       }
-      _entityconnect_alter_form_state_input($form_state, $field_info['module'], $widget_container_type, $parents, $language, $element['#default_value']);
+      if (isset($element)) {
+        _entityconnect_alter_form_state_input($form_state, $field_info['module'], $widget_container_type, $parents, $language, $element['#default_value']);
+      }
     }
     $form_state['#entityconnect_processed'] = TRUE;
     $form = drupal_rebuild_form($form_id, $form_state, $form);

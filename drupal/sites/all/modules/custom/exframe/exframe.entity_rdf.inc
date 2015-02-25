@@ -943,11 +943,11 @@ function exframe_entity_rdf_mappings() {
   );
 
   // Exported Entity RDF mapping: node:xf_bioassay:field_xf_base_caller
-  $rdf_mappings['node:xf_bioassay:field_xf_base_caller'] = array(
-    'rdf properties' => array(
-      0 => 'isa:base_caller',
-    ),
-  );
+  //$rdf_mappings['node:xf_bioassay:field_xf_base_caller'] = array(
+    //'rdf properties' => array(
+     // 0 => 'isa:base_caller',
+    //),
+  //);
 
   // Exported Entity RDF mapping: node:xf_bioassay:field_xf_bioassay_notes
   $rdf_mappings['node:xf_bioassay:field_xf_bioassay_notes'] = array(
@@ -969,51 +969,58 @@ function exframe_entity_rdf_mappings() {
       0 => 'obo:OBI_0000800',
     ),
   );
+   
+  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_treatment_type
+  $rdf_mappings['node:xf_bioassay:field_xf_treatment_type'] = array(
+    'rdf properties' => array(
+      0 => 'efo:EFO_0000727',
+    ),
+  );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_extraction_protocol
-  $rdf_mappings['node:xf_bioassay:field_xf_extraction_protocol'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_extraction_protocol
+  $rdf_mappings['node:xf_experiment:field_xf_extraction_protocol'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0000490',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_factor
-  $rdf_mappings['node:xf_bioassay:field_xf_factor'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_factors
+  $rdf_mappings['node:xf_experiment:field_xf_factors'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0000001',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_fragment_length_unit
-  $rdf_mappings['node:xf_bioassay:field_xf_fragment_length_unit'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_fragment_length_unit
+  $rdf_mappings['node:xf_experiment:field_xf_fragment_length_unit'] = array(
     'rdf properties' => array(
       0 => 'obo:UO_0000001',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_fragment_length_value
-  $rdf_mappings['node:xf_bioassay:field_xf_fragment_length_value'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_fragment_length_value
+  $rdf_mappings['node:xf_experiment:field_xf_fragment_length_value'] = array(
     'rdf properties' => array(
       0 => 'obo:PATO_0000122',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_fragmentation_method
-  $rdf_mappings['node:xf_bioassay:field_xf_fragmentation_method'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_fragmentation_method
+  $rdf_mappings['node:xf_experiment:field_xf_fragmentation_method'] = array(
     'rdf properties' => array(
       0 => 'obo:OBI_0000943',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_hybridization_protocol
-  $rdf_mappings['node:xf_bioassay:field_xf_hybridization_protocol'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_hybridization_protocol
+  $rdf_mappings['node:xf_experiment:field_xf_hybridization_protocol'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0003790',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_scan_protocol
-  $rdf_mappings['node:xf_bioassay:field_xf_scan_protocol'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_scan_protocol
+  $rdf_mappings['node:xf_experiment:field_xf_scan_protocol'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0003814',
     ),
@@ -1026,57 +1033,57 @@ function exframe_entity_rdf_mappings() {
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_label
-  $rdf_mappings['node:xf_bioassay:field_xf_label'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_label
+  $rdf_mappings['node:xf_experiment:field_xf_label'] = array(
     'rdf properties' => array(
       0 => 'mged:LabelCompound',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_label_protocol
-  $rdf_mappings['node:xf_bioassay:field_xf_label_protocol'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_label_protocol
+  $rdf_mappings['node:xf_experiment:field_xf_label_protocol'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0003808',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_library_const_protocol
-  $rdf_mappings['node:xf_bioassay:field_xf_library_const_protocol'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_library_const_protocol
+  $rdf_mappings['node:xf_experiment:field_xf_library_const_protocol'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0004184',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_library_layout
-  $rdf_mappings['node:xf_bioassay:field_xf_library_layout'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_library_layout
+  $rdf_mappings['node:xf_experiment:field_xf_library_layout'] = array(
     'rdf properties' => array(
       0 => 'isa:library_layout',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_library_selection
-  $rdf_mappings['node:xf_bioassay:field_xf_library_selection'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_library_selection
+  $rdf_mappings['node:xf_experiment:field_xf_library_selection'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0004105',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_library_source
-  $rdf_mappings['node:xf_bioassay:field_xf_library_source'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_library_source
+  $rdf_mappings['node:xf_experiment:field_xf_library_source'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0004104',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_library_strategy
-  $rdf_mappings['node:xf_bioassay:field_xf_library_strategy'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_library_strategy
+  $rdf_mappings['node:xf_experiment:field_xf_library_strategy'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0004102',
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_bioassay:field_xf_measurement_type
-  $rdf_mappings['node:xf_bioassay:field_xf_measurement_type'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_measurement_type
+  $rdf_mappings['node:xf_experiment:field_xf_measurement_type'] = array(
     'rdf properties' => array(
       0 => 'mged:has_measurement_type',
     ),
@@ -1090,11 +1097,11 @@ function exframe_entity_rdf_mappings() {
   );
 
   // Exported Entity RDF mapping: node:xf_bioassay:field_xf_quality_score_system
-  $rdf_mappings['node:xf_bioassay:field_xf_quality_score_system'] = array(
-    'rdf properties' => array(
-      0 => 'isa:quality_score_system',
-    ),
-  );
+  //$rdf_mappings['node:xf_bioassay:field_xf_quality_score_system'] = array(
+    //'rdf properties' => array(
+      //0 => 'isa:quality_score_system',
+   // ),
+  //);
 
   // Exported Entity RDF mapping: node:xf_bioassay:field_xf_replicate
   $rdf_mappings['node:xf_bioassay:field_xf_replicate'] = array(
@@ -1230,8 +1237,8 @@ function exframe_entity_rdf_mappings() {
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_growth_protocol
-  $rdf_mappings['node:xf_biomaterial:field_xf_growth_protocol'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_growth_protocol
+  $rdf_mappings['node:xf_experiment:field_xf_growth_protocol'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0003789',
     ),
@@ -1300,6 +1307,69 @@ function exframe_entity_rdf_mappings() {
     ),
   );
 
+  // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_race
+  $rdf_mappings['node:xf_biomaterial:field_xf_race'] = array(
+    'rdf properties' => array(
+      0 => 'ncit:C17049',
+    ),
+  );
+
+   // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_ethnicity
+  $rdf_mappings['node:xf_biomaterial:field_xf_ethnicity'] = array(
+    'rdf properties' => array(
+      0 => 'ncit:C16564',
+    ),
+  );
+  
+   // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_vector
+  $rdf_mappings['node:xf_biomaterial:field_xf_vector'] = array(
+    'rdf properties' => array(
+      0 => 'ncit:C1329',
+    ),
+  );
+
+   // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_karyotype
+  $rdf_mappings['node:xf_biomaterial:field_xf_karyotype'] = array(
+    'rdf properties' => array(
+      0 => 'ncit:C25215',
+    ),
+  );
+  
+  // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_origin_cell_line
+  $rdf_mappings['node:xf_biomaterial:field_xf_origin_cell_line'] = array(
+    'rdf properties' => array(
+      0 => 'isa:cell_line_of_origin',
+    ),
+  );
+  
+  // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_origin_cell_type
+  $rdf_mappings['node:xf_biomaterial:field_xf_origin_cell_type'] = array(
+    'rdf properties' => array(
+      0 => 'isa:cell_type_of_origin',
+    ),
+  );
+  
+  // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_origin_lab
+  $rdf_mappings['node:xf_biomaterial:field_xf_origin_lab'] = array(
+    'rdf properties' => array(
+      0 => 'isa:laboratory_of_origin',
+    ),
+  );
+  
+  // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_culture_conditions
+  $rdf_mappings['node:xf_biomaterial:field_xf_culture_conditions'] = array(
+    'rdf properties' => array(
+      0 => 'obo:OBI_0000997',
+    ),
+  );
+
+// Exported Entity RDF mapping: node:xf_biomaterial:field_xf_treatment_type
+  $rdf_mappings['node:xf_biomaterial:field_xf_treatment_type'] = array(
+    'rdf properties' => array(
+      0 => 'efo:EFO_0000727',
+    ),
+  );
+  
   // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_treatment_compound
   $rdf_mappings['node:xf_biomaterial:field_xf_treatment_compound'] = array(
     'rdf properties' => array(
@@ -1307,8 +1377,8 @@ function exframe_entity_rdf_mappings() {
     ),
   );
 
-  // Exported Entity RDF mapping: node:xf_biomaterial:field_xf_treatment_protocol
-  $rdf_mappings['node:xf_biomaterial:field_xf_treatment_protocol'] = array(
+  // Exported Entity RDF mapping: node:xf_experiment:field_xf_treatment_protocol
+  $rdf_mappings['node:xf_experiment:field_xf_treatment_protocol'] = array(
     'rdf properties' => array(
       0 => 'efo:EFO_0003969',
     ),
@@ -1425,7 +1495,7 @@ function exframe_entity_rdf_mappings() {
     'field properties' => array(
       'title' => array(
         'rdf properties' => array(
-          0 => 'mged:BibliographicReference',
+          0 => 'dc:references',
         ),
       ),
     ),

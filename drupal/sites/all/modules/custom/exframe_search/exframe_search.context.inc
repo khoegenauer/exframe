@@ -50,17 +50,17 @@ function exframe_search_context_default_contexts() {
           'region' => 'sidebar_first',
           'weight' => '-7',
         ),
-        'facetapi-33b4w5USsgkwF5NkSiZf6V9BX3tN64qz' => array(
+        'facetapi-YV1827U0y5ehg6PIs6aMqCws1w4raRM5' => array(
           'module' => 'facetapi',
-          'delta' => '33b4w5USsgkwF5NkSiZf6V9BX3tN64qz',
+          'delta' => 'YV1827U0y5ehg6PIs6aMqCws1w4raRM5',
           'region' => 'sidebar_first',
           'weight' => '-6',
         ),
-        'facetapi-m6TGxtd4cR6mGDkCkC9zka29Oj0d1tNf' => array(
+        'facetapi-FGKJOZy1rCMD1p7SfptNeXKnugoMElpp' => array(
           'module' => 'facetapi',
-          'delta' => 'm6TGxtd4cR6mGDkCkC9zka29Oj0d1tNf',
+          'delta' => 'FGKJOZy1rCMD1p7SfptNeXKnugoMElpp',
           'region' => 'sidebar_first',
-          'weight' => '-5',
+          'weight' => '-4',
         ),
       ),
     ),

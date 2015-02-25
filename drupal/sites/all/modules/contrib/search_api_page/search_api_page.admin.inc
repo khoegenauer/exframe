@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Admin page callbacks for the Search pages module.
+ */
 
 /**
  * Displays an overview of all defined search pages.
@@ -24,19 +28,11 @@ function search_api_page_admin_overview() {
     '#title' => t('disabled'),
   );
   $t_disabled['class'] = array('search-api-status');
-  $t_enable = t('enable');
-  $t_disable = t('disable');
   $t_edit = t('edit');
-  $t_delete = t('delete');
   $pre = 'admin/config/search/search_api/page/';
   $pre_index = 'admin/config/search/search_api/index/';
-  $enable = '/enable';
-  $disable = '/disable';
-  $edit = '/edit';
-  $delete = '/delete';
 
   foreach (search_api_page_load_multiple() as $page) {
-    $url = $pre . $page->machine_name;
     $index = search_api_index_load($page->index_id);
     $rows[] = array(
       $page->enabled ? $t_enabled : $t_disabled,
@@ -44,7 +40,7 @@ function search_api_page_admin_overview() {
       l($page->name, $page->path),
       l($page->path, $page->path),
       l($index->name, $pre_index . $index->machine_name),
-      l($t_edit, $url . $edit),
+      l($t_edit, $pre . $page->machine_name),
     );
   }
 
@@ -87,9 +83,9 @@ function search_api_page_admin_add(array $form, array &$form_state) {
     );
     $form['machine_name'] = array(
       '#type' => 'machine_name',
-      '#maxlength' => 51,
+      '#maxlength' => 32,
       '#machine_name' => array(
-        'exists' => 'search_api_index_load',
+        'exists' => 'search_api_page_load',
       ),
     );
     $form['index_id'] = array(
@@ -182,14 +178,28 @@ function search_api_page_admin_add(array $form, array &$form_state) {
     '#title' => t('Allow GET override'),
     '#description' => t('Allow the „Results per page“ setting to be overridden from the URL, using the "per_page" GET parameter.<br />' .
         'Example: http://example.com/search_results?per_page=7'),
+    '#default_value' => FALSE,
+  );
+
+  $form['result_page_search_form'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show search form on result page'),
+    '#description' => t('Enable or disable the search form on the result page'),
     '#default_value' => TRUE,
+  );
+
+  $form['allow_empty_search'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow empty search'),
+    '#description' => t('Enable or disable the empty search. When enabled, empty search will display all results.'),
+    '#default_value' => FALSE,
   );
 
   $view_modes = array(
     'search_api_page_result' => t('Themed as search results'),
   );
   // For entities, we also add all entity view modes.
-  if ($entity_info = entity_get_info($index->item_type)) {
+  if ($index->getEntityType() && ($entity_info = entity_get_info($index->getEntityType()))) {
     foreach ($entity_info['view modes'] as $mode => $mode_info) {
       $view_modes[$mode] = $mode_info['label'];
     }
@@ -207,7 +217,24 @@ function search_api_page_admin_add(array $form, array &$form_state) {
   else {
     $form['view_mode'] = array(
       '#type' => 'value',
-      '#value' => reset($view_modes),
+      '#value' => key($view_modes),
+    );
+  }
+
+  $languages = array(
+    'current' => t("Current user's language"),
+    'default' => t('Default site language'),
+  );
+  $languages += entity_metadata_language_list();
+  if (count($languages) > 4) {
+    $form['language_filter'] = array(
+      '#type' => 'select',
+      '#title' => t('Language filter'),
+      '#description' => t('Filter the results by language. Select none to show results independent of language.'),
+      '#options' => $languages,
+      '#multiple' => TRUE,
+      '#size' => min(4, count($languages)),
+      '#default_value' => array(),
     );
   }
 
@@ -219,22 +246,6 @@ function search_api_page_admin_add(array $form, array &$form_state) {
       '#default_value' => TRUE,
     );
   }
-
-  $description = t('This is what is shown when the user enters an empty search, or removes all filters from an active search.') . ' ';
-  if (!module_exists('search_api_facetapi')) {
-    $description .= t('<strong>Facets will not be shown until you enable the Search facets module.</strong>');
-  }
-  $form['empty_behavior'] = array(
-    '#type' => 'radios',
-    '#title' => t('Behavior on empty search'),
-    '#options' => array(
-      'none' => t("Show search box"),
-      'blocks'  => t("Show enabled facets' blocks in their configured regions"),
-      'results' => t("Show enabled facets' blocks in their configured regions and first page of all available results"),
-    ),
-    '#description' => $description,
-    '#default_value' => 'none',
-  );
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -375,6 +386,20 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
     '#default_value' => $page->options['per_page'],
   );
 
+  $form['options']['result_page_search_form'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show search form on result page'),
+    '#description' => t('Enable or disable the search form on the result page'),
+    '#default_value' => isset($page->options['result_page_search_form']) ? $page->options['result_page_search_form'] : TRUE,
+  );
+
+  $form['options']['allow_empty_search'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow empty search'),
+    '#description' => t('Enable or disable the empty search. When enabled, empty search will display all results.'),
+    '#default_value' => isset($page->options['allow_empty_search']) ? $page->options['allow_empty_search'] : FALSE,
+  );
+
   $form['options']['get_per_page'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow GET override'),
@@ -387,7 +412,7 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
     'search_api_page_result' => t('Themed as search results'),
   );
   // For entities, we also add all entity view modes.
-  if ($entity_info = entity_get_info($index->item_type)) {
+  if ($index->getEntityType() && ($entity_info = entity_get_info($index->getEntityType()))) {
     foreach ($entity_info['view modes'] as $mode => $mode_info) {
       $view_modes[$mode] = $mode_info['label'];
     }
@@ -405,7 +430,24 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
   else {
     $form['options']['view_mode'] = array(
       '#type' => 'value',
-      '#value' => reset($view_modes),
+      '#value' => key($view_modes),
+    );
+  }
+
+  $languages = array(
+    'current' => t("Current user's language"),
+    'default' => t('Default site language'),
+  );
+  $languages += entity_metadata_language_list();
+  if (count($languages) > 4) {
+    $form['options']['language_filter'] = array(
+      '#type' => 'select',
+      '#title' => t('Language filter'),
+      '#description' => t('Filter the results by language. Select none to show results independent of language.'),
+      '#options' => $languages,
+      '#multiple' => TRUE,
+      '#size' => min(4, count($languages)),
+      '#default_value' => isset($page->options['language_filter']) ? $page->options['language_filter'] : array(),
     );
   }
 
@@ -417,22 +459,6 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
       '#default_value' => !empty($page->options['search_api_spellcheck']),
     );
   }
-
-  $description = t('This is what is shown when the user enters an empty search, or removes all filters from an active search.') . ' ';
-  if (!module_exists('search_api_facetapi')) {
-    $description .= t('<strong>Facets will not be shown until you enable the Search facets module.</strong>');
-  }
-  $form['options']['empty_behavior'] = array(
-    '#type' => 'radios',
-    '#title' => t('Behavior on empty search'),
-    '#options' => array(
-      'none' => t("Show search box"),
-      'blocks'  => t("Show enabled facets' blocks in their configured regions"),
-      'results' => t("Show enabled facets' blocks in their configured regions and first page of all available results"),
-    ),
-    '#description' => $description,
-    '#default_value' => isset($page->options['empty_behavior']) ? $page->options['empty_behavior'] : 'none',
-  );
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -467,7 +493,6 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
     );
   }
 
-
   return $form;
 }
 
@@ -475,7 +500,7 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
  * Validation callback for search_api_page_admin_edit().
  */
 function search_api_page_admin_edit_validate(array $form, array &$form_state) {
-  if ($form_state['values']['op'] == t('Save changes')) {
+  if (!empty($form_state['values']['op']) && $form_state['values']['op'] == t('Save changes')) {
     $form_state['values']['path'] = drupal_strtolower(trim($form_state['values']['path']));
     $pages = search_api_page_load_multiple(FALSE, array('path' => $form_state['values']['path']));
     if (count($pages) > 1 || (($page = array_shift($pages)) && $page->machine_name != $form_state['page']->machine_name)) {

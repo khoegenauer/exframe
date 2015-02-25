@@ -53,7 +53,7 @@ function sparql_get_store($name, $type = 'store') {
     'endpoint_timeout' => 60, /* not implemented in ARC2 preview */
     'endpoint_read_key' => '', /* optional */
     'endpoint_write_key' => 'somekey', /* optional */
-    'endpoint_max_limit' => 500, /* optional */
+    'endpoint_max_limit' => 1000, /* optional */
   );
 
   /* instantiation */
@@ -132,7 +132,7 @@ function _sparql_init_store($name, $endpoint = FALSE) {
     'endpoint_timeout' => 60, /* not implemented in ARC2 preview */
     'endpoint_read_key' => '', /* optional */
     'endpoint_write_key' => '', /* optional */
-    'endpoint_max_limit' => 500, /* optional */
+    'endpoint_max_limit' => 1000, /* optional */
   );
 
   // If this site is exposing a SPARQL endpoint, instantiate the endpoint with

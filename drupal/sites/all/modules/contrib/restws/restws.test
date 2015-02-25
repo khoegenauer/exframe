@@ -41,14 +41,7 @@ class RestWSTestCase extends DrupalWebTestCase {
     $new_node = array(
       'body'      => array(LANGUAGE_NONE => array(array())),
       'title'     => $title,
-      'comment'   => 2,
-      'promote'   => 0,
-      'revision'  => 1,
-      'log'       => '',
-      'status'    => 1,
-      'sticky'    => 0,
       'type'      => 'page',
-      'language'  => LANGUAGE_NONE,
       'author'    => $account->uid,
     );
     $json = drupal_json_encode($new_node);
@@ -99,6 +92,136 @@ class RestWSTestCase extends DrupalWebTestCase {
   }
 
   /**
+   * Tests access to restricted input formats.
+   */
+  public function testBadInputFormat() {
+    module_enable(array('php'));
+    // Reset the cache of valid permissions so that the PHP code format
+    // permission exists.
+    $this->checkPermissions(array(), TRUE);
+
+    // Assure that users can't create nodes with unauthorized input formats.
+    $unprivileged_account = $this->drupalCreateUser(array('bypass node access', 'access resource node'));
+    $title = $this->randomName(8);
+    $new_node = array(
+      'body'  => array(
+        'value' => $this->randomName(30),
+        'format' => 'php_code',
+      ),
+      'title' => $title,
+      'type' => 'page',
+    );
+    $json = drupal_json_encode($new_node);
+    $result = $this->httpRequest('node', 'POST', $unprivileged_account, $json);
+    $this->assertResponse('403');
+    $this->assertEqual($result, '403 Forbidden: Not authorized to set property body');
+    $node = entity_load('node', FALSE, array('title' => $title));
+    $this->assertEqual(count($node), 0, "Node with unauthorized input format wasn't created");
+
+    // Check that the format is allowed if the permission is present.
+    $privileged_account = $this->drupalCreateUser(array('bypass node access', 'access resource node', 'use text format php_code'));
+    $this->httpRequest('node', 'POST', $privileged_account, $json);
+    $this->assertResponse('201');
+
+    $node = entity_load('node', FALSE, array('title' => $title));
+    $this->assertEqual(count($node), 1, "Node was created");
+    $node = reset($node);
+    $this->assertEqual($node->body[LANGUAGE_NONE][0]['value'], $new_node['body']['value'], 'The new node body has the correct value');
+    $this->assertEqual($node->body[LANGUAGE_NONE][0]['format'], 'php_code', 'The new node has the correct format');
+
+    // Check that users can't update nodes with unauthorized input formats.
+    $node->body[LANGUAGE_NONE][0]['format'] = 'filtered_html';
+    node_save($node);
+
+    $new_body = $this->randomName(30);
+    $update = array(
+      'body'  => array(
+        'value' => $new_body,
+        'format' => 'php_code',
+      ),
+    );
+    $json = drupal_json_encode($update);
+    $result = $this->httpRequest('node/1', 'PUT', $unprivileged_account, $json);
+    $this->assertResponse('403');
+    $this->assertEqual($result, '403 Forbidden: Not authorized to set property body');
+    $node = node_load(1, NULL, TRUE);
+    $this->assertNotEqual($node->body[LANGUAGE_NONE][0]['value'], $new_body);
+    $this->assertEqual($node->body[LANGUAGE_NONE][0]['format'], 'filtered_html');
+
+    // Check that the format is allowed if the permission is present.
+    $this->httpRequest('node/1', 'PUT', $privileged_account, $json);
+    $this->assertResponse('200');
+    $node = node_load(1, NULL, TRUE);
+    $this->assertEqual($node->body[LANGUAGE_NONE][0]['value'], $new_body);
+    $this->assertEqual($node->body[LANGUAGE_NONE][0]['format'], 'php_code');
+  }
+
+  /**
+   * Test field level access restrictions.
+   *
+   * @see restws_test_field_access()
+   */
+  public function testFieldAccess() {
+    module_enable(array('restws_test'));
+
+    // Add text field to nodes.
+    $field_info = array(
+      'field_name' => 'field_text',
+      'type' => 'text',
+      'entity_types' => array('node'),
+    );
+    field_create_field($field_info);
+
+    $instance = array(
+      'label' => 'Text Field',
+      'field_name' => 'field_text',
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'settings' => array(),
+      'required' => FALSE,
+    );
+    field_create_instance($instance);
+
+    // A user without the "administer users" permission should not be able to
+    // create a node with the access protected field.
+    $unprivileged_account = $this->drupalCreateUser(array('bypass node access', 'access resource node'));
+    $title = $this->randomName(8);
+    $new_node = array(
+      'title' => $title,
+      'type' => 'page',
+      'field_text' => 'test',
+    );
+    $json = drupal_json_encode($new_node);
+    $this->httpRequest('node', 'POST', $unprivileged_account, $json);
+    $this->assertResponse('403');
+    $nodes = entity_load('node', FALSE, array('title' => $title));
+    $this->assertEqual(count($nodes), 0, "Node with access protected field wasn't created");
+
+    // Test again with the additional permission, this should work now.
+    $privileged_account = $this->drupalCreateUser(array('bypass node access', 'access resource node', 'administer users'));
+    $this->httpRequest('node', 'POST', $privileged_account, $json);
+    $this->assertResponse('201');
+    $node = node_load(1, NULL, TRUE);
+    $this->assertEqual($node->field_text[LANGUAGE_NONE][0]['value'], 'test');
+
+    // Update test: unpriviledged users should not be able to change the
+    // protected field.
+    $update = array('field_text' => 'newvalue');
+    $json = drupal_json_encode($update);
+    $result = $this->httpRequest('node/1', 'PUT', $unprivileged_account, $json);
+    $this->assertResponse('403');
+    $this->assertEqual($result, '403 Forbidden: Not authorized to set property field_text');
+    $node = node_load(1, NULL, TRUE);
+    $this->assertEqual($node->field_text[LANGUAGE_NONE][0]['value'], 'test');
+
+    // Check that the update is allowed if the permission is present.
+    $this->httpRequest('node/1', 'PUT', $privileged_account, $json);
+    $this->assertResponse('200');
+    $node = node_load(1, NULL, TRUE);
+    $this->assertEqual($node->field_text[LANGUAGE_NONE][0]['value'], 'newvalue');
+  }
+
+  /**
    * Test entity references with an array which contains id, entity type.
    */
   public function testResourceArray() {
@@ -139,7 +262,7 @@ class RestWSTestCase extends DrupalWebTestCase {
       <node>
         <title>bar</title>
         <type>article</type>
-        <author resource="user" id="1">' . restws_resource_uri('user', 1) . '</author>
+        <author resource="user" id="' . $account->uid . '">' . restws_resource_uri('user', $account->uid) . '</author>
         <field_tags>
           <item resource="taxonomy_term" id="1">' . restws_resource_uri('taxonomy_term', 1) . '</item>
           <item resource="taxonomy_term" id="2">' . restws_resource_uri('taxonomy_term', 2) . '</item>
@@ -209,20 +332,13 @@ class RestWSTestCase extends DrupalWebTestCase {
     $new_node = array(
       'body'      => array(LANGUAGE_NONE => array(array())),
       'title'     => $this->randomName(8),
-      'comment'   => 2,
-      'promote'   => 0,
-      'revision'  => 1,
-      'log'       => '',
-      'status'    => 1,
-      'sticky'    => 0,
       'type'      => 'page',
-      'language'  => LANGUAGE_NONE,
       'author'    => $account->uid,
       $property_name => $property_name,
     );
     $json = drupal_json_encode($new_node);
     $result = $this->httpRequest('node', 'POST', $account, $json);
-    $this->assertEqual($result, "406 Not Acceptable: Unknown data properties: $property_name.", 'Response body is correct');
+    $this->assertEqual($result, "406 Not Acceptable: Unknown data property $property_name.", 'Response body is correct');
     $this->assertResponse('406', 'HTTP response code is correct.');
 
 
@@ -242,6 +358,23 @@ class RestWSTestCase extends DrupalWebTestCase {
     // Clear the static cache, otherwise we won't see the update.
     $node = node_load($node->nid, NULL, TRUE);
     $this->assertNotEqual($node->title, $new_title, 'Node title was not updated in the database.');
+
+    // Simulate a cache poisoning attack where JSON could get into the page
+    // cache.
+    // Grant node resource access to anonymous users.
+    user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, array('access resource node'));
+    // Enable page caching.
+    variable_set('cache', 1);
+    // Reset cURL here to delete any stored request settings.
+    unset($this->curlHandle);
+    // Request the JSON representation of the node.
+    $this->drupalGet("node/$node->nid", array(), array('Accept: application/json'));
+    $this->assertUrl("node/$node->nid.json", array(), 'Requesting a resource with JSON Accept header redirects to the .json URL.');
+    // Now request the HTML representation.
+    $result = $this->drupalGet("node/$node->nid");
+    $content_type = $this->drupalGetHeader('content-type');
+    $this->assertNotEqual($content_type, 'application/json', 'Content type header is not JSON after requesting HTML.');
+    $this->assertNull(drupal_json_decode($result), 'Response body is not JSON after requesting HTML.');
   }
 
   /**
@@ -346,6 +479,11 @@ class RestWSTestCase extends DrupalWebTestCase {
 
     $this->assertEqual($result_nodes['list'][1]['title'], 'node4', 'Right node title was received.');
     $this->assertEqual($result_nodes['list'][1]['body']['format'], 'full_html', 'Node has body with full_html.');
+
+    // Test SQL injection via order direction.
+    $this->httpRequest('node.json', 'GET', $account, array('sort' => 'title', 'direction' => 'ASC; DELETE FROM ' . $this->databasePrefix . 'node WHERE nid = 1; --'));
+    $node = node_load(1, NULL, TRUE);
+    $this->assertNotEqual($node, FALSE, 'Node has not been deleted through SQL injection.');
   }
 
   /**
@@ -386,15 +524,13 @@ class RestWSTestCase extends DrupalWebTestCase {
     $nodes = drupal_json_decode($result);
     // No node should be returned.
     $this->assertEqual(count($nodes['list']), 0, 'Unpublished node was successfully hidden.');
-
+    $this->assertNoResponse(404, 'An empty collection should not cause a 404 response.');
   }
 
   /**
    * Test menu path resource setting.
    */
   public function testMenuPath() {
-    module_enable(array('restws_test'));
-
     $account = $this->drupalCreateUser(array('access content',
         'bypass node access', 'access resource node')
     );
@@ -403,8 +539,25 @@ class RestWSTestCase extends DrupalWebTestCase {
     $title = $this->randomName(8);
     $node = $this->drupalCreateNode(array('title' => $title));
 
-    $result = $this->httpRequest('foo/1.json', 'GET', $account);
-    $this->assertEqual($node->title, $title, "Node was received correctly on the right menu path.");
+    module_enable(array('restws_test'), TRUE);
+
+    foreach (array('bar', 'foo/bar', 'foo/bar/node', 'api-v1.2', 'this/is/a/really/long/path') as $menu_path) {
+      // Register the menu_path for this test.
+      variable_set('restws_test_menu_path', $menu_path);
+      variable_set('menu_rebuild_needed', TRUE);
+
+      // Verify that the query uri is working.
+      $result = $this->drupalGet($menu_path . '.json');
+      $this->assertResponse(200);
+      $result = drupal_json_decode($result);
+      $this->assertEqual($result['list'][0]['title'], $title);
+
+      // Verify that the view uri is working.
+      $result = $this->drupalGet($menu_path . '/1.json');
+      $this->assertResponse(200);
+      $result = drupal_json_decode($result);
+      $this->assertEqual($result['title'], $title);
+   }
   }
 
   /**
@@ -436,13 +589,15 @@ class RestWSTestCase extends DrupalWebTestCase {
       case 'GET':
         // Set query if there are addition GET parameters.
         $options = isset($body) ? array('absolute' => TRUE, 'query' => $body) : array('absolute' => TRUE);
-        return $this->curlExec(array(
+        $curl_options = array(
           CURLOPT_HTTPGET => TRUE,
           CURLOPT_URL => url($url, $options),
-          CURLOPT_NOBODY => FALSE)
+          CURLOPT_NOBODY => FALSE,
         );
+        break;
+
       case 'POST':
-        return $this->curlExec(array(
+        $curl_options = array(
           CURLOPT_HTTPGET => FALSE,
           CURLOPT_POST => TRUE,
           CURLOPT_POSTFIELDS => $body,
@@ -452,9 +607,11 @@ class RestWSTestCase extends DrupalWebTestCase {
             'Content-Type: application/' . $format,
             'X-CSRF-Token: ' . $token,
           ),
-        ));
+        );
+        break;
+
       case 'PUT':
-        return $this->curlExec(array(
+        $curl_options = array(
           CURLOPT_HTTPGET => FALSE,
           CURLOPT_CUSTOMREQUEST => 'PUT',
           CURLOPT_POSTFIELDS => $body,
@@ -464,15 +621,29 @@ class RestWSTestCase extends DrupalWebTestCase {
             'Content-Type: application/' . $format,
             'X-CSRF-Token: ' . $token,
           ),
-        ));
+        );
+        break;
+
       case 'DELETE':
-        return $this->curlExec(array(
+        $curl_options = array(
           CURLOPT_HTTPGET => FALSE,
           CURLOPT_CUSTOMREQUEST => 'DELETE',
           CURLOPT_URL => url($url, array('absolute' => TRUE)),
           CURLOPT_NOBODY => FALSE,
           CURLOPT_HTTPHEADER => array('X-CSRF-Token: ' . $token),
-        ));
+        );
+        break;
     }
+
+    $response = $this->curlExec($curl_options);
+    $headers = $this->drupalGetHeaders();
+    $headers = implode("\n", $headers);
+
+    $this->verbose($method . ' request to: ' . $url .
+      '<hr />Code: ' . curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE) .
+      '<hr />Response headers: ' . $headers .
+      '<hr />Response body: ' . $response);
+
+    return $response;
   }
 }

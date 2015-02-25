@@ -14,3 +14,4 @@ isa_translation_file	isa_translations.txt
 ontology_reference_file	Ontology_Ref.txt
 drupal_path	sites/default/files
 sparql_key	123
+server_path	/var/www/example

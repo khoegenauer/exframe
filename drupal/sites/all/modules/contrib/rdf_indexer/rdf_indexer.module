@@ -1,0 +1,30 @@
+<?php
+/**
+ * @file
+ * Provides a RDF-based service class for the Search API.
+ */
+
+/**
+ * Implements hook_search_api_service_info().
+ */
+function rdf_indexer_search_api_service_info() {
+  $services['rdf_indexer_service'] = array(
+    'name' => t('RDF indexer service'),
+    'description' => t('<p>Index items using an RDF store server.</p>'),
+    'class' => 'RdfIndexerArc2StoreService',
+  );
+  return $services;
+}
+
+/**
+ * Implements hook_search_api_alter_callback_info().
+ */
+function rdf_indexer_search_api_alter_callback_info() {
+  $callbacks['rdf_indexer_alter_entity_public'] = array(
+    'name' => t('Public entities'),
+    'description' => t('Only index entities which are publicly accessible.'),
+    'class' => 'RdfIndexerAlterEntityPublic',
+  );
+
+  return $callbacks;
+}

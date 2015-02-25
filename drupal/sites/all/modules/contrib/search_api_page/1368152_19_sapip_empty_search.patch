@@ -1,0 +1,129 @@
+diff --git a/search_api_page.admin.inc b/search_api_page.admin.inc
+index a993136..e419a67 100644
+--- a/search_api_page.admin.inc
++++ b/search_api_page.admin.inc
+@@ -231,6 +231,22 @@ function search_api_page_admin_add(array $form, array &$form_state) {
+     );
+   }
+ 
++  $description = t('This is what is shown when the user enters an empty search, or removes all filters from an active search.') . ' ';
++  if (!module_exists('search_api_facetapi')) {
++    $description .= t('<strong>Facets will not be shown until you enable the Search facets module.</strong>');
++  }
++  $form['empty_behavior'] = array(
++    '#type' => 'radios',
++    '#title' => t('Behavior on empty search'),
++    '#options' => array(
++      'none' => t("Show search box"),
++      'blocks'  => t("Show enabled facets' blocks in their configured regions"),
++      'results' => t("Show enabled facets' blocks in their configured regions and first page of all available results"),
++    ),
++    '#description' => $description,
++    '#default_value' => 'none',
++  );
++
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => t('Create page'),
+@@ -420,6 +436,22 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
+     );
+   }
+ 
++  $description = t('This is what is shown when the user enters an empty search, or removes all filters from an active search.') . ' ';
++  if (!module_exists('search_api_facetapi')) {
++    $description .= t('<strong>Facets will not be shown until you enable the Search facets module.</strong>');
++  }
++  $form['options']['empty_behavior'] = array(
++    '#type' => 'radios',
++    '#title' => t('Behavior on empty search'),
++    '#options' => array(
++      'none' => t("Show search box"),
++      'blocks'  => t("Show enabled facets' blocks in their configured regions"),
++      'results' => t("Show enabled facets' blocks in their configured regions and first page of all available results"),
++    ),
++    '#description' => $description,
++    '#default_value' => isset($page->options['empty_behavior']) ? $page->options['empty_behavior'] : 'none',
++  );
++
+   $form['actions']['#type'] = 'actions';
+   $form['actions']['submit'] = array(
+     '#type' => 'submit',
+diff --git a/search_api_page.install b/search_api_page.install
+index 58962ae..e729b9d 100644
+--- a/search_api_page.install
++++ b/search_api_page.install
+@@ -195,3 +195,17 @@ function search_api_page_update_7102() {
+     throw new DrupalUpdateException(t('An exception occurred during the update: @msg.', array('@msg' => $e->getMessage())));
+   }
+ }
++
++/**
++ * Add the default option for the empty search option to all existing search
++ * pages.
++ */
++function search_api_page_update_7103() {
++  $pages = search_api_page_load_multiple();
++  if (!empty($pages)) {
++    foreach ($pages as $page) {
++      $page->options['empty_behavior'] = 'none';
++      $page->save();
++    }
++  }
++}
+diff --git a/search_api_page.pages.inc b/search_api_page.pages.inc
+index 25e6886..ba9046d 100644
+--- a/search_api_page.pages.inc
++++ b/search_api_page.pages.inc
+@@ -30,7 +30,8 @@ function search_api_page_view($id, $keys = NULL) {
+     $ret['form'] = drupal_get_form('search_api_page_search_form', $page, $keys);
+   }
+ 
+-  if ($keys) {
++  // Do a search if we have keys, or our empty behavior and facets dictate.
++  if ($keys || $page->options['empty_behavior'] == 'results' || ($page->options['empty_behavior'] == 'blocks' && !empty($_GET['f']))) {
+     try {
+       $results = search_api_page_search_execute($page, $keys);
+     }
+@@ -71,6 +72,10 @@ function search_api_page_view($id, $keys = NULL) {
+       }
+     }
+   }
++  else if ($page->options['empty_behavior'] == 'blocks') {
++    // Run an empty search so we can have facets.
++    search_api_page_search_execute_empty_search($page);
++  }
+ 
+   if (isset($page->options['original_per_page'])) {
+     $page->options['per_page'] = $page->options['original_per_page'];
+@@ -91,7 +96,7 @@ function search_api_page_view($id, $keys = NULL) {
+  * @return array
+  *   The search results as returned by SearchApiQueryInterface::execute().
+  */
+-function search_api_page_search_execute(Entity $page, $keys) {
++function search_api_page_search_execute(Entity $page, $keys = '') {
+   $limit = $page->options['per_page'];
+   $offset = pager_find_page() * $limit;
+   $options = array(
+@@ -113,6 +118,22 @@ function search_api_page_search_execute(Entity $page, $keys) {
+ }
+ 
+ /**
++ * Executes an empty search.
++ *
++ * @param Entity $page
++ *   The page for which a search should be executed.
++ */
++function search_api_page_search_execute_empty_search(Entity $page) {
++  $options = array(
++    'search id' => 'search_api_page:' . $page->path,
++    'parse mode' => $page->options['mode'],
++  );
++  $query = search_api_query($page->index_id, $options)
++    ->range(0, 0);
++  $query->execute();
++}
++
++/**
+  * Function for preprocessing the variables for the search_api_page_results
+  * theme.
+  *

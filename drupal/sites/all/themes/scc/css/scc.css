@@ -36,7 +36,7 @@ a:link {
 }
 
 #zone-content {
-	margin-bottom: 50px;
+	margin-bottom: 10px;
 	padding-bottom: 20px;
 	border-bottom-right-radius: 10px;
 	border-bottom-left-radius: 10px;
@@ -407,6 +407,34 @@ ul.nice-menu  li.menuparent ul li {
 }
 
 
+/* For bioassay measurement type and platform show full width*/
+.node-xf-experiment td.exframe-cell.exframe-mtype .field-items,
+.node-xf-experiment td.exframe-cell.exframe-platform .field-items {
+  width: 100%;
+  float: none;
+}
+
+
+/* For processed analysis of RNA-Seq: field-name-field-results-directory show full width */
+.node-xf-experiment .field-name-field-xf-results-directory .field-items,
+.node-xf-experiment .field-name-field-xf-results-directory .field-label {
+  width: 90%;
+  float: none;
+  margin: 10px 20px;
+}
+
+.node-dir-listing footer,
+.node-dir-listing header,
+.dir-listing-status {
+	display: none;
+}
+
+.node-xf-experiment .field-name-field-xf-fastqc-results .field-label,
+.node-xf-experiment .field-name-field-xf-fastqc-results .field-items {
+	float: none;
+	margin: 10px 20px;
+}
+
 .node-xf-experiment .field-name-field-xf-biblio-citation .field-label,
 .node-xf-experiment .field-name-field-xf-related-experiment .field-label {
   float: none;
@@ -489,6 +517,17 @@ ul.nice-menu  li.menuparent ul li {
 
 .node-xf-experiment .field-name-field-xf-researcher-analysis > .field-items {
   width: 100%;
+}
+
+.node-xf-experiment .field-name-rtype-data p {
+	margin-bottom: 5px;
+	margin-top: 30px;
+	padding: 0px 5px;
+}
+
+.node-xf-experiment .field-name-rtype-data table {
+	margin-bottom: 10px;
+	
 }
 
 
@@ -658,7 +697,7 @@ thead th {
 
 #block-views-xf-bioassay-count-block .view-content{
 	/* to add up to 940px */
-	width:300px;
+	width:320px;
 	margin-left: 320px;
 	margin-right:320px;
 	margin-top: 20px;
@@ -710,8 +749,8 @@ thead th {
 
 
 /* My Labs */
-.view-exframe-lab-experiments .node-published header,
-.view-exframe-lab-experiments .node-links{
+.view-exframe-lab-experiments header,
+.view-exframe-lab-experiments .node-links {
   display: none;
 }
 

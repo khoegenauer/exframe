@@ -1,0 +1,13 @@
+name = Multiselect
+description = Defines a CCK multiple selection field widget, to allow easier multi-selection for users.
+package = CCK
+core = "7.x"
+version = VERSION
+
+files[] = multiselect.module
+; Information added by Drupal.org packaging script on 2014-09-02
+version = "7.x-1.10"
+core = "7.x"
+project = "multiselect"
+datestamp = "1409681329"
+

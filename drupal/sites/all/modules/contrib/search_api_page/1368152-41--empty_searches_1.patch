@@ -1,0 +1,176 @@
+diff --git a/search_api_page.admin.inc b/search_api_page.admin.inc
+index 8d4bba9..9150304 100644
+--- a/search_api_page.admin.inc
++++ b/search_api_page.admin.inc
+@@ -112,6 +112,17 @@ function search_api_page_admin_add(array $form, array &$form_state) {
+       '#maxlength' => 50,
+       '#required' => TRUE,
+     );
++  $form['empty_behavior'] = array(
++    '#type' => 'radios',
++    '#title' => t('Behavior on empty search'),
++    '#options' => array(
++      '' => t('Just show the search box'),
++      'results' => t('Show the first page of all available results'),
++      'blocks'  => t("Perform an empty search but don't display any results."),
++    ),
++    '#description' => t('This determines what is shown when the user first comes to the search page or submits an empty keyword string. For example if you want <a href="@url">Facet API</a> facets to show without having entered any search terms, select the "Perform an empty search …" option. If you would like a page of results displayed regardless of the presence of any search terms then select the "Show the first page …" option.', array('@url' => 'https://drupal.org/project/facetapi')),
++    '#default_value' => '',
++  );
+ 
+     $form['submit'] = array(
+       '#type' => 'submit',
+@@ -445,6 +456,17 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
+       '#default_value' => !empty($page->options['search_api_spellcheck']),
+     );
+   }
++  $form['options']['empty_behavior'] = array(
++    '#type' => 'radios',
++    '#title' => t('Behavior on empty search'),
++    '#options' => array(
++      '' => t('Just show the search box'),
++      'results' => t('Show the first page of all available results'),
++      'blocks' => t("Perform an empty search but don't display any results."),
++    ),
++    '#description' => t('This determines what is shown when the user first comes to the search page or submits an empty keyword string. For example if you want <a href="@url">Facet API</a> facets to show without having entered any search terms, select the "Perform an empty search …" option. If you would like a page of results displayed regardless of the presence of any search terms then select the "Show the first page …" option.', array('@url' => 'https://drupal.org/project/facetapi')),
++    '#default_value' => empty($page->options['empty_behavior']) ? '' : $page->options['empty_behavior'],
++  );
+ 
+   $form['actions']['#type'] = 'actions';
+   $form['actions']['submit'] = array(
+diff --git a/search_api_page.module b/search_api_page.module
+index 41622d3..ed1259f 100755
+--- a/search_api_page.module
++++ b/search_api_page.module
+@@ -511,7 +511,9 @@ function search_api_page_search_form(array $form, array &$form_state, Entity $pa
+  * @see search_api_page_search_form_submit()
+  */
+ function search_api_page_search_form_validate(array $form, array &$form_state) {
+-  if (!trim($form_state['values']['keys_' . $form_state['values']['id']])) {
++  $page = search_api_page_load($form_state['values']['id']);
++
++  if (!trim($form_state['values']['keys_' . $form_state['values']['id']]) && empty($page->options['empty_behavior']))  {
+     form_set_error('keys_' . $form_state['values']['id'], t('Please enter at least one keyword.'));
+   }
+ }
+diff --git a/search_api_page.pages.inc b/search_api_page.pages.inc
+index a86fde5..928beb0 100644
+--- a/search_api_page.pages.inc
++++ b/search_api_page.pages.inc
+@@ -7,9 +7,9 @@
+ /**
+  * Displays a search page.
+  *
+- * @param $id
++ * @param string $id
+  *   The search page's machine name.
+- * @param $keys
++ * @param string|null $keys
+  *   The keys to search for.
+  */
+ function search_api_page_view($id, $keys = NULL) {
+@@ -19,9 +19,14 @@ function search_api_page_view($id, $keys = NULL) {
+   }
+ 
+   // Pre-process keys (unescape \ and /).
+-  $keys = explode("\\\\", $keys);
+-  $keys = str_replace("\\", "/", $keys);
+-  $keys = implode("\\", $keys);
++  if (isset($keys) && $keys !== '') {
++    $keys = explode("\\\\", $keys);
++    $keys = str_replace("\\", "/", $keys);
++    $keys = implode("\\", $keys);
++  }
++  else {
++    $keys = NULL;
++  }
+ 
+   $ret['#contextual_links']['search_api_page'] = array(
+     'admin/config/search/search_api/page',
+@@ -32,7 +37,8 @@ function search_api_page_view($id, $keys = NULL) {
+     $ret['form'] = drupal_get_form('search_api_page_search_form', $page, $keys);
+   }
+ 
+-  if ($keys) {
++  // Do a search if we have keys, or our empty behavior and facets dictate.
++  if ($keys || !empty($page->options['empty_behavior'])) {
+     // Override per_page setting with GET parameter.
+     $limit = $page->options['per_page'];
+     if (!empty($page->options['get_per_page'])
+@@ -53,6 +59,10 @@ function search_api_page_view($id, $keys = NULL) {
+       return $ret;
+     }
+ 
++    if (!$results) {
++      return $ret;
++    }
++
+     // If spellcheck results were returned then add them to the render array.
+     if (isset($results['search_api_spellcheck'])) {
+       $ret['results']['#spellcheck'] = array(
+@@ -99,18 +109,20 @@ function search_api_page_view($id, $keys = NULL) {
+  *
+  * @param Entity $page
+  *   The page for which a search should be executed.
+- * @param string $keys
+- *   The keywords to search for.
++ * @param string|null $keys
++ *   The keywords to search for, or NULL for a search without keywords.
+  * @param int $limit
+  *   The maximum number of results to return.
+  *
+- * @return array
+- *   The search results as returned by SearchApiQueryInterface::execute().
++ * @return array|false
++ *   FALSE if no keys were given, no facet filters are present and the page is
++ *   configured to show no results in this case. Otherwise, the search results
++ *   as returned by SearchApiQueryInterface::execute().
+  *
+  * @throws SearchApiException
+  *   If an error occurred during the search.
+  */
+-function search_api_page_search_execute(Entity $page, $keys, $limit = 10) {
++function search_api_page_search_execute(Entity $page, $keys = NULL, $limit = 10) {
+   $offset = pager_find_page() * $limit;
+   $options = array(
+     'search id' => 'search_api_page:' . $page->path,
+@@ -141,7 +153,38 @@ function search_api_page_search_execute(Entity $page, $keys, $limit = 10) {
+       $query->filter($filter);
+     }
+   }
+-  return $query->execute();
++  $results = $query->execute();
++  if (!$keys && $page->options['empty_behavior'] === 'blocks' && !search_api_page_query_has_facets($query)) {
++    return FALSE;
++  }
++  return $results;
++}
++
++/**
++ * Determines whether an executed query had any facet filters set.
++ *
++ * @param SearchApiQueryInterface $query
++ *   The query in question.
++ *
++ * @return bool
++ *   TRUE if there are filters with a "facet:*" tag present in the query object,
++ *   FALSE otherwise.
++ */
++function search_api_page_query_has_facets(SearchApiQueryInterface $query) {
++  // Check that the search server supports facets.
++  $index = $query->getIndex();
++  if (module_exists('facetapi') && $index->server()->supportsFeature('search_api_facets')) {
++    // Load the search index's adapter plugin and process the facets.
++    $adapter = facetapi_adapter_load('search_api@' . $index->machine_name);
++    $adapter->processFacets();
++
++    // Check if there are any active facets and return a boolean accordingly.
++    return (bool) $adapter->getAllActiveItems();
++  }
++
++  // If the search server doesn't support facets, there aren't any facet filters
++  // set by definition.
++  return FALSE;
+ }
+ 
+ /**

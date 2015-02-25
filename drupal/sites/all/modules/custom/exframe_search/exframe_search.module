@@ -10,11 +10,13 @@ function exframe_search_block_view_alter(&$data, $block) {
   // Context cannot override the subject of a block, so we do it manually here.
   // @todo find a way to store this with block settings in context.
   $replacements = array(
-    'Filter by bioassays » replicates » biomaterial(s) » organism:' => 'Organism',
-    'Filter by bioassays » replicates » biomaterial(s) » disease state:' => 'Disease',
-    'Filter by bioassays » replicates » biomaterial(s) » cell type:' => 'Cell Type',
-    'Filter by bioassays » measurement type:' => 'Assay Type',
-    'Filter by contact(s):' => 'Researcher',
+    //'Filter by bioassays » replicates » biomaterial(s) » organism:' => 'Organism',
+    'Filter by sample group » replicates » sample(s) » organism:' => 'Organism',
+    'Filter by sample group » replicates » sample(s) » disease state:' => 'Disease',
+    'Filter by sample group » replicates » sample(s) » cell type:' => 'Cell Type',
+    'Filter by measurement type:' => 'Assay Type',
+    //Removed: 'Filter by contact(s):' => 'Researcher',
+    'Filter by contact(s) » exframe profile profile » lab:' => 'Lab',
   );
   if ($block->module == 'facetapi') {
     $data['subject'] = strtr($data['subject'], $replacements);
@@ -30,3 +32,378 @@ function exframe_search_search_api_facetapi_keys_alter(&$keys, $query) {
     $keys = '';
   }
 }
+
+
+/**
+ * Implements hook_menu().
+ */
+function exframe_search_menu(){
+	//Declare a new form (search) this item is for genesearch
+	$items['tools/genesearch'] = array(
+  	'title' => t('Gene Search'),
+  	'page callback' => 'drupal_get_form',
+  	'page arguments' => array('exframe_search_genesaerch', 1),
+  	'access arguments' => array('access content'),
+		'type' => MENU_VISIBLE_IN_BREADCRUMB,
+	);
+	
+	
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function exframe_search_theme() {
+  return array(
+    'genesearch_result' => array(
+      'variables' => array('exp_object' => NULL),
+    ),
+  );
+}
+
+/*
+
+??
+function exframe_search_form_alter(&$form, &$form_state, $form_id){
+ $form['submitting'] = array('#type' => 'submit', '#value' => t('Import'));
+ 
+ }
+*/
+
+
+
+
+/**
+ * Custom genesearch theme to print the result of probes, pval, fc for each job based on gene symbol in the fc_matrix table.
+ */
+function theme_genesearch_result($exp_result) {
+
+  if(is_array($exp_result)){
+		foreach($exp_result as $exp_id => $show_experiment){
+
+			$title = db_query('SELECT title FROM node WHERE nid = :expid LIMIT 1', array(':expid'=>$exp_id) )->fetchField();
+
+			foreach($show_experiment as $job_id => $exp_job){
+				$row = array();
+        $groups = exframe_search_query_get_job($job_id);
+				
+				$row[] = l($title, 'node/'.$exp_id);
+				$row[] = l($groups['experimental'], 'node/'.$groups['experimental_id']);
+				$row[] = l($groups['baseline'], 'node/'.$groups['baseline_id']);
+				$probes_row = NULL;
+
+				$fc = array();
+				$probes = array();
+				$pval = array();
+				foreach($exp_job as $values){
+					$probes[] = $values['probe'];
+					$pval[] = sprintf('%.2E', $values['pvalue']).'<br/>';
+					$fc[] = round($values['fold_change'], 1).'<br/>';
+					
+				}
+				
+				$row[] = theme('item_list', array('items'=>$probes));
+				$row[] = theme('item_list', array('items'=>$fc));
+				$row[] = theme('item_list', array('items'=>$pval));
+				$rows[] = $row;
+			}
+		}
+  }
+	$headers = array('Experiment Title', 'Experimental', 'Baseline', 'Probes', 'Fold Change', 'P-Value');
+	$output = theme('table', array('header'=>$headers, 'rows'=>$rows));
+  return $output;
+}
+
+
+//Given the loaded view object+display and form state of a given custom form, extract views filters as form_api elements
+function exframe_view_filters_to_form($view_exposed, $form_state){
+/* Must get view to set it's filters while fetching the fields
+	$view_exposed = views_get_view($view_name);
+	$view_exposed->set_display($display_name);
+	*/
+	
+	$view_exposed->init_handlers(); //initialize display handlers 
+	//Setup form_state to be passed to drupal_build_form
+	$form_state_exposed = array(
+		'view' => $view_exposed,
+		'display' => $view_exposed->display_handler->display,
+		'exposed_form_plugin' => $view_exposed->display_handler->get_plugin('exposed_form'), //exposed form plugins are used in Views 3
+		'method' => 'post	',
+		'rerender' => FALSE,
+		'no_redirect' => TRUE,
+		'always_process' => TRUE,
+	);
+
+	//Load the exposed filters form
+	$exposed_form = drupal_build_form('views_exposed_form', $form_state_exposed); 
+	
+	//The exposed form fields are not structured to work with form_api. So for each of the filters in the view, we find the field in $exposed_form and generate an array that works with form_api
+  //Loop through every filter handler on this view
+	foreach($view_exposed->display_handler->handlers['filter'] as $k => $f){
+		//Check to  make sure this is an exposed field
+		if($f->options['exposed']){
+			$identifier = $f->options['expose']['identifier'];
+			$label = $f->options['expose']['label'];
+			//Find the exposed field in the views_exposed_form's built form
+			if(isset($exposed_form[$identifier])){
+				//Create filters array to be returned, exposed form elements in form_api format
+				$filters[$identifier] = $exposed_form[$identifier];
+				$filters[$identifier]['#title'] = $label;
+				//Set default value from previous form reload
+				$filters[$identifier]['#value'] = $form_state['input'][$identifier];
+				//Set the view's filter values for query
+				$view_exposed->exposed_input[$identifier] = $form_state['input'][$identifier];
+			}
+		}
+	}
+
+	return $filters;
+	
+}
+
+function exframe_search_genesaerch($form, &$form_state, $argument){
+	
+	//Set which view will be doing filtering on experiments to merge result with this search
+	$view_name = 'experiment_search';
+	$display_id = 'page';
+	//Load the experiment search view - this object will be used down the line to query experiments based on the exposed filters and 
+	$view = views_get_view($view_name);
+	$view->set_display($display_id);
+	//Get all exposed forms from the view into new $exposed_form
+	//Note: Must send the current view object to populate filter values
+	$exposed_form = exframe_view_filters_to_form($view, $form_state);
+	//Once we have the default values set and passed the filters to views, we merge the filters with this form.
+	$form = array_merge($form, $exposed_form);
+	
+	//Our form array now contains all the exposed filters in the view
+	
+	
+	
+	//Set default for gene search string
+	$genesymbol = $form_state['input']['title'];
+	//Default values for pval/fc
+	if(!empty($form_state['input']['field_pvalue'])){
+		$pval = $form_state['input']['field_pvalue'];
+	}else{
+		$pval = '1.5';
+	}
+	     
+	if(!empty($form_state['input']['field_fc'])){
+		$fc = $form_state['input']['field_fc'];
+	}else{
+		$fc = '0.5';
+	}
+	
+	
+	//Default values have been set
+	
+	
+	
+	
+	//Custom form elements 
+	$form['title'] = array(
+	  '#type' => 'textfield', 
+	  '#title' => t('Gene'), 
+	  '#size' => 60, 
+	  '#default_value' => $genesymbol,
+	  '#required' => TRUE,
+	  '#weight' => -10
+	);
+	//pvalue field
+	$form['field_pvalue'] = array(
+	  '#type' => 'textfield', 
+	  '#title' => t('Maximum P Value'), 
+	  '#default_value' => $pval,
+	  '#size' => 60, 
+	  '#required' => TRUE,
+	);
+	//minimum fc value field
+	$form['field_fc'] = array(
+	  '#type' => 'textfield', 
+	  '#title' => t('Minimum FC Value'), 
+	  '#default_value' => $fc,
+	  '#size' => 60, 
+	  '#required' => TRUE,
+	); 
+	$form['submit'] = array('#type' => 'submit', '#value' => t('Search'));
+
+
+  //If we have a gene symbol, run the view query to filter experiments based on it's filters and cross compare the views results with genesearch results
+	if(!empty($genesymbol)){
+		$view->pre_execute();
+		$view->execute();
+		$view_result = $view->result;
+		foreach($view_result as $view_item){
+			$pool[$view_item->nid] = $view_item->nid;
+		}
+		//$pool is now an array of view fitler results with the nid as their key. Later we will filter our result against this one to filter any unwanted rows
+		
+		//The result field. This is a markup field to contain all the results from the saerch
+		$result_display = theme('html_tag',
+        array('#type' => 'container',
+        '#tag' => 'div',
+        '#attributes' => array('class' => 'genesearchresults'),
+        '#value' => exframe_search_gene_result($genesymbol,array('field_filters'=>array('pvalue'=>$pval, 'fcvalue'=>$fc), 'view_filters' => array('experiment_search' =>$pool))),
+				)
+      );
+      
+      
+    $result_display = theme('container', array(
+    'element' => array(
+      '#children' => exframe_search_gene_result($genesymbol,array('field_filters'=>array('pvalue'=>$pval, 'fcvalue'=>$fc), 'view_filters' => array('experiment_search' =>$pool))),
+      '#id' => 'login-link',
+      '#attributes' => array(
+        'class' => array(
+          'genesearchresults'
+        )
+      )
+    )
+  ));
+      
+      
+		$form['result'] = array('#markup' => $result_display);
+	}
+
+	
+	return $form;
+}
+
+function exframe_search_genesaerch_submit($form, &$form_state) {
+	$form_state['rebuild'] = TRUE; 	
+}
+
+
+/*
+ * Query: Genes by symbol
+ * $symbol: Symbol of gene to query
+ */
+function exframe_search_query_get_genes($symbol){
+  //Select Genes based on Gene Symbol
+	$gene_ids = db_query('SELECT g.gene_id FROM {rtype_genes} g WHERE g.symbol = :sym', array(':sym' =>$symbol));
+	
+	while($gene_id = $gene_ids->fetchAssoc()){
+		//Array of searched Genes
+		$genes[] = $gene_id['gene_id'];
+	}
+
+	return array_unique($genes);
+}
+
+/*
+ * Query: Probes by genes
+ * $genes: Array of genes to search
+ */
+function exframe_search_query_get_probes($genes){
+//Create string for in() statement
+	$search_genes = implode(',',$genes);
+	
+	//Select all probes associated to any selected gene_id as selected by the symbol
+	///*** This is breaking up to look for linking table.
+	$probes = db_query('SELECT DISTINCT probe_id FROM {rtype_probe_genes} WHERE gene_id in('.$search_genes.')');
+	while($probe = $probes->fetchAssoc()){
+		//Array of searched Genes
+		$probe_array[] = $probe['probe_id'];
+	}
+	//hsci_print($probe_array);
+	return array_unique($probe_array);
+}
+
+/*
+ * Query: Experiments/Jobs - fc matrix - by probes.
+ * $probes: Array of probes to return experiments and jobs
+ * $vars: Query parameters
+ * Returns multidimensional array of experiments and their jobs associated to selected probes
+ $experiments[exp_id]
+  ['job_id'] => array(
+    [0] =>array(
+      array(
+        'pavlue' => value,
+        'fold_change' => value,
+        'probe' => value
+      ),
+    ),
+    [1] => ...
+  ),
+  ['job_id'] => ...
+  
+ */
+function exframe_search_query_fc_matrix_jobs_byprobe($probes, $filters){
+	//Concat for query
+  $search_probes = implode(',',$probes);
+	//Set filter values for query 
+	$min_fc_value = $filters['field_filters']['fcvalue'];
+	$max_p_value = $filters['field_filters']['pvalue'];
+hsci_print($search_probes);
+	//Query through the job table, find all jobs which have the selected probe_id  for selected genes
+	$experiments = db_query('SELECT p.name as probe, fc.pvalue, fc.fold_change, j.job_id, j.exp_id FROM rtype_jobs j LEFT JOIN rtype_fc_matrix fc ON fc.job_id = j.job_id LEFT JOIN rtype_probes p ON p.probe_id = fc.probe_id where fc.probe_id in('.$search_probes.') AND abs(fc.fold_change) > '.$min_fc_value.' AND abs(fc.pvalue) < '.$max_p_value.' AND j.job_type = 2;');
+	if($viewfilter = $filters['view_filters']['experiment_search']){
+		//For each of the experiments found who had resulted in the probes in rtype_fc_matrix defined by the gene_id...
+		while($exp = $experiments->fetchAssoc()){
+			//Add them into a multidimensional array to distinguish association with specific job_id (way of processing that experiment, it's not 1 to 1) as all experiment results
+			if(is_numeric($viewfilter[$exp['exp_id']])){
+				$exp_result[$exp['exp_id']][$exp['job_id']][] = array('pvalue'=>$exp['pvalue'], 'fold_change'=>$exp['fold_change'], 'probe'=>$exp['probe']);
+			}
+		}
+	}
+
+	return $exp_result;
+}
+
+/*
+ * Get get job information
+ 
+  Array
+  (
+      [baseline] => p42:ER 6hr Vehicle control
+      [experimental] => p42:ER 6hr Estradiol
+      [baseline_id] => 7576
+      [experimental_id] => 7570
+  )
+ */
+function exframe_search_query_get_job($job_id){
+  $result = db_query('SELECT n.title as baseline, nn.title as experimental, fc.baseline_id, fc.experimental_id FROM rtype_fc_definition fc LEFT JOIN node n ON n.nid = fc.baseline_id LEFT JOIN node nn ON nn.nid = fc.experimental_id WHERE fc.job_id = :jobid LIMIT 1', array(':jobid'=>$job_id))->fetchAssoc();  
+  return $result;
+}
+
+
+/**
+ * Genesearch [fc_matrix]: result of probes, pval, fc for each job based on gene symbol in the fc_matrix table.
+ */
+function exframe_search_gene_result($gene_symbol, $filters){
+	//Make sure gene string is set
+	if(!isset($gene_symbol)){
+		return 'Gene Symbol is required.';
+	}
+	//Make sure it returns results
+	$search_genes_array = exframe_search_query_get_genes($gene_symbol);
+	if(empty($search_genes_array)){
+		return 'Gene not found.';
+	}
+	
+	//Get the probes
+	$probe_array = exframe_search_query_get_probes($search_genes_array);
+
+	//Make sure we found matching probes
+	if(empty($probe_array)){
+		return 'Gene was found, but no probes were mapped.';
+	}
+
+	$exp_result = exframe_search_query_fc_matrix_jobs_byprobe($probe_array, $filters);
+	if(empty($exp_result)){
+		return 'No results found.';
+	}
+	return theme('genesearch_result', $exp_result);
+}
+
+
+
+//Custom dpm
+function hsci_print($val){
+  foreach($val as $key => $v){
+   $keys[] = $key;
+   }
+   drupal_set_message('First level keys: <pre>'.print_r($keys, true).'</pre>');
+	drupal_set_message('<pre>'.print_r($val, true).'</pre>');
+}
+

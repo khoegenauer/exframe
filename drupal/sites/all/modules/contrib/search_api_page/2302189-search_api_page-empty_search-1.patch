@@ -1,0 +1,67 @@
+diff --git a/search_api_page.admin.inc b/search_api_page.admin.inc
+index 8d4bba9..cd854ab 100644
+--- a/search_api_page.admin.inc
++++ b/search_api_page.admin.inc
+@@ -188,6 +188,13 @@ function search_api_page_admin_add(array $form, array &$form_state) {
+     '#default_value' => TRUE,
+   );
+ 
++  $form['allow_empty_search'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Allow empty search'),
++    '#description' => t('Enable or disable the empty search. When enabled, empty search will display all results.'),
++    '#default_value' => FALSE,
++  );
++
+   $view_modes = array(
+     'search_api_page_result' => t('Themed as search results'),
+   );
+@@ -386,6 +393,13 @@ function search_api_page_admin_edit(array $form, array &$form_state, Entity $pag
+     '#default_value' => isset($page->options['result_page_search_form']) ? $page->options['result_page_search_form'] : TRUE,
+   );
+ 
++  $form['options']['allow_empty_search'] = array(
++    '#type' => 'checkbox',
++    '#title' => t('Allow empty search'),
++    '#description' => t('Enable or disable the empty search. When enabled, empty search will display all results.'),
++    '#default_value' => isset($page->options['allow_empty_search']) ? $page->options['allow_empty_search'] : FALSE,
++  );
++
+   $form['options']['get_per_page'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Allow GET override'),
+diff --git a/search_api_page.module b/search_api_page.module
+index 09ea8a5..47500a4
+--- a/search_api_page.module
++++ b/search_api_page.module
+@@ -514,8 +514,11 @@ function search_api_page_search_form(array $form, array &$form_state, Entity $pa
+  * @see search_api_page_search_form_submit()
+  */
+ function search_api_page_search_form_validate(array $form, array &$form_state) {
+-  if (!trim($form_state['values']['keys_' . $form_state['values']['id']])) {
+-    form_set_error('keys_' . $form_state['values']['id'], t('Please enter at least one keyword.'));
++  $id   = $form_state['values']['id'];
++  $page = search_api_page_load($id);
++
++  if (!trim($form_state['values']['keys_' . $id]) && !$page->options['allow_empty_search']) {
++    form_set_error('keys_' . $id, t('Please enter at least one keyword.'));
+   }
+ }
+ 
+diff --git a/search_api_page.pages.inc b/search_api_page.pages.inc
+index a86fde5..e9fa68d 100644
+--- a/search_api_page.pages.inc
++++ b/search_api_page.pages.inc
+@@ -32,7 +32,11 @@ function search_api_page_view($id, $keys = NULL) {
+     $ret['form'] = drupal_get_form('search_api_page_search_form', $page, $keys);
+   }
+ 
+-  if ($keys) {
++  if (!$keys && $page->options['allow_empty_search']) {
++    $keys = NULL;
++  }
++
++  if ($keys || is_null($keys)) {
+     // Override per_page setting with GET parameter.
+     $limit = $page->options['per_page'];
+     if (!empty($page->options['get_per_page'])

@@ -1,16 +1,20 @@
-ont_short_name	ont_long_name	ont_version
-BTO	BRENDA tissue/enzyme source	12/20/2012
-CHEBI	Chemical entities of biological interest	99 (01/09/2013)
-CL	Cell type	2011-11-09
-EFO	Experimental Factor Ontology	2.32 (1/15/2013)
-FMA	Foundational Model of Anatomy	3.1 (03/03/2010)
-ICD10	ICD10	01/01/1998
-MA	Mouse adult gross anatomy	07/22/2011
-NCIt	NCI Thesaurus	12.04e (04/30/2012)
-NCBITaxon	NCBI organismal classification	1.2 (12/12/2011)
-OBI	Ontology for Biomedical Investigations	2012-07-01
-PATO	Phenotypic quality	01/09/2013
-PR	PRotein Ontology	31.0 (01/15/2013)
-SO	Sequence types and features	11/01/2012
-UO	Units of measurement	08/30/2012
-ZFA	Zebrafish anatomy and development	12/07/2012
+ont_short_name	ont_long_name	ont_version	ont_file
+BTO	BRENDA Tissue and Enzyme Source Ontology	1.2	http://data.bioontology.org/ontologies/BTO
+CHEBI	Chemical Entities of Biological Interest Ontology	78	http://data.bioontology.org/ontologies/CHEBI
+CLO	Cell Line Ontology	2.1.59	http://data.bioontology.org/ontologies/CLO
+CL	Cell Ontology	43	http://data.bioontology.org/ontologies/CL
+DOID	Disease Ontology	July-15-2014	http://data.bioontology.org/ontologies/DOID
+EFO	Experimental Factor Ontology	111	http://data.bioontology.org/ontologies/EFO
+FMA	Foundational Model of Anatomy	3.1	http://data.bioontology.org/ontologies/FMA
+GO	Gene Ontology	4/20/14	http://data.bioontology.org/ontologies/GO
+ICD10	"International Classification of Diseases, Version 10"	2013AA	http://data.bioontology.org/ontologies/ICD10
+MA	Mouse Adult Gross Anatomy	7/22/11	http://data.bioontology.org/ontologies/MA
+NCIT	National Cancer Institute Thesaurus	24	http://data.bioontology.org/ontologies/NCIT
+NCBITAXON	National Center for Biotechnology Information (NCBI) Organismal Classification	1.2	http://data.bioontology.org/ontologies/NCBITAXON
+OBI	Ontology for Biomedical Investigations	21	http://data.bioontology.org/ontologies/OBI
+PATO	Phenotypic Quality Ontology	10/28/13	http://data.bioontology.org/ontologies/PATO
+PR	Protein Ontology	36	http://data.bioontology.org/ontologies/PR
+SNOMEDCT	Systematized Nomenclature of Medicine - Clinical Terms	2014AA 	http:/data.bioontology.org/ontologies/SNOMEDCT
+SO	Sequence Types and Features Ontology	7/28/12	http://data.bioontology.org/ontologies/SO
+UO	Units of Measurement Ontology	2/12/13	http://data.bioontology.org/ontologies/UO
+ZFA	Zebrafish Anatomy and Development Ontology	10/4/12	http://data.bioontology.org/ontologies/ZFA

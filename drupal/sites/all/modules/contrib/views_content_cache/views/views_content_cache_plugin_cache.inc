@@ -75,7 +75,7 @@ class views_content_cache_plugin_cache extends views_plugin_cache {
   }
 
   function summary_title() {
-    return "Content cache";
+    return t('Content cache');
   }
 
   /**
@@ -116,4 +116,25 @@ class views_content_cache_plugin_cache extends views_plugin_cache {
     return $cutoff;
   }
 
+  /**
+   * Determine expiration time in the cache table of the cache type
+   * or CACHE_PERMANENT if item shouldn't be removed automatically from cache.
+   *
+   * @param $type
+   *   The cache type, either 'query', 'result' or 'output'.
+   * @return int
+   *   The timestamp of the expiration time.
+   */
+  function cache_set_expire($type) {
+    $expiration_time = CACHE_PERMANENT;
+
+    // Only enforce a maximum lifetime if it's been specifically selected:
+    if ($max_lifespan = $this->options[$type . '_max_lifespan']) {
+      if ($max_lifespan != -1) {
+        $max_lifespan = REQUEST_TIME + $max_lifespan;
+        $expiration_time = max($max_lifespan, $expiration_time);
+      }
+    }
+    return $expiration_time;
+  }
 }

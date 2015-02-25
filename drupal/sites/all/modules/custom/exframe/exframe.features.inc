@@ -7,20 +7,22 @@
 /**
  * Implements hook_ctools_plugin_api().
  */
-function exframe_ctools_plugin_api() {
-  list($module, $api) = func_get_args();
+function exframe_ctools_plugin_api($module = NULL, $api = NULL) {
   if ($module == "context" && $api == "context") {
     return array("version" => "3");
   }
-  list($module, $api) = func_get_args();
   if ($module == "ds" && $api == "ds") {
     return array("version" => "1");
   }
-  list($module, $api) = func_get_args();
+  if ($module == "feeds" && $api == "feeds_importer_default") {
+    return array("version" => "1");
+  }
+  if ($module == "feeds_tamper" && $api == "feeds_tamper_default") {
+    return array("version" => "2");
+  }
   if ($module == "field_group" && $api == "field_group") {
     return array("version" => "1");
   }
-  list($module, $api) = func_get_args();
   if ($module == "strongarm" && $api == "strongarm") {
     return array("version" => "1");
   }
@@ -29,8 +31,8 @@ function exframe_ctools_plugin_api() {
 /**
  * Implements hook_views_api().
  */
-function exframe_views_api() {
-  return array("version" => "3.0");
+function exframe_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
 }
 
 /**
@@ -39,19 +41,19 @@ function exframe_views_api() {
 function exframe_node_info() {
   $items = array(
     'xf_bioassay' => array(
-      'name' => t('Bioassays'),
+      'name' => t('Sample Group'),
       'base' => 'node_content',
-      'description' => t('Grouping of replicates that share a common biomaterial, platform, technology, and protocols. '),
+      'description' => t('Grouping of samples (replicates or cohorts) that share common features.'),
       'has_title' => '1',
-      'title_label' => t('Bioassay Name'),
-      'help' => t('Enter the bioassay name. The suggested format is [type]-[biomaterial]-[condition(s)], e.g. Control-GMP-5days.  '),
+      'title_label' => t('Sample Group Name'),
+      'help' => t('Enter the sample group name. The suggested format is [type]-[sample]-[condition(s)].  For example, Control-GMP-5days.  '),
     ),
     'xf_biomaterial' => array(
-      'name' => t('Biomaterial'),
+      'name' => t('Sample'),
       'base' => 'node_content',
-      'description' => t('Biomaterial information includes organism, developmental stage, tissue type, cell type, genotype, treatment, etc.'),
+      'description' => t('Sample information includes organism, developmental stage, tissue type, cell type, genotype, treatment, etc.'),
       'has_title' => '1',
-      'title_label' => t('Biomaterial Name'),
+      'title_label' => t('Sample Name'),
       'help' => '',
     ),
     'xf_experiment' => array(
@@ -65,11 +67,12 @@ function exframe_node_info() {
     'xf_group' => array(
       'name' => t('Group'),
       'base' => 'node_content',
-      'description' => t('To create groups of users, such as labs or organizations, that control access to content.'),
+      'description' => t('Security groups of users, such as labs or organizations, that control access to content.'),
       'has_title' => '1',
       'title_label' => t('Title'),
       'help' => '',
     ),
   );
+  drupal_alter('node_info', $items);
   return $items;
 }

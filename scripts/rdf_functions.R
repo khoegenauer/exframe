@@ -136,12 +136,46 @@ field_collection = function(collection_id, sparql_endpoint, url_end, sparql_pass
   return(collection_url)
 }
 
+
+# Get json/sparql query for an item. type = node or replicate so far
+item_json = function(dir_data, dir_scripts, sparql_endpoint, sparql_key, item_id, item_type) {
+  item_json = paste(dir_data, "/temp/", item_id, "_json.txt", sep="")
+  get_json = paste("python3.3 ", dir_scripts, "/sparql_call.py ", sparql_endpoint, " ", sparql_key, " ", item_type, " ", item_id, " ", item_json, sep="")
+  system(get_json)
+  item_list = fromJSON(item_json)
+
+  item_url = names(item_list)
+  item_data_names = names(item_list[[item_url]])
+  item_relation = c()
+  item_value = c()
+
+  for (name in item_data_names) {
+      item_relation = c(item_relation, name)
+      # if it has more than one value, add additional relationship placeholders 
+      if (length(item_list[[item_url]][[name]][["value"]]) > 1) {
+          times = length(item_list[[item_url]][[name]][["value"]]) - 1
+          placeholder = rep(name,times)
+          item_relation = c(item_relation, placeholder)
+      }
+      # if it has no value
+      if (is.null(item_list[[item_url]][[name]][["value"]])) {
+        item_value = c(item_value, "")
+      } else { # append all values
+        item_value = c(item_value, as.vector(item_list[[item_url]][[name]][["value"]]))
+      }
+  }
+  subject = rep(item_url, length(item_relation))
+  item_df = data.frame(cbind(subject, item_relation, item_value), stringsAsFactors=FALSE)
+  colnames(item_df) = c("subject", "predicate", "object")
+  return(item_df)
+}
+
 # Get the variable names for each data point by comparing the ontology in the rdf
 # to the ontologies listed in the RDF_Ref; if they match, use variable name from that line
 # If there are multiple matches, use the first exact match
 get_variables = function(df_object, node_id) {
-  nrows = dim(df_object)[1]  
-  df_out = data.frame()	
+  nrows = dim(df_object)[1]
+  df_out = data.frame()
   pred_values = rep("a", nrows)
   
   for (k in 1:nrows) { 
@@ -151,7 +185,7 @@ get_variables = function(df_object, node_id) {
       pred_values[k] = gsub('^.*\\/(.*)\\>$', '\\1', df_object[k,2], perl=TRUE) 
     }
     
-    var_name = rdf_ref[c(grep(pred_values[k], as.character(rdf_ref$Term_Ontology_URL), perl = TRUE)),]$Variable  
+    var_name = rdf_ref[c(grep(pred_values[k], as.character(rdf_ref$Term_Ontology_URL), perl = TRUE)),]$Variable
     num_matches = length(var_name)
     
     if (num_matches > 1) {
@@ -160,6 +194,14 @@ get_variables = function(df_object, node_id) {
           var_name = var_name[z]
           break
         }
+        test = paste("<",pred_values[k],">", sep="")
+        if (length(rownames(rdf_ref[as.character(rdf_ref$Term_Ontology_URL) == test,])) == 1) {
+          x = rownames(rdf_ref[as.character(rdf_ref$Term_Ontology_URL) == test,])
+          if (var_name[z] == rdf_ref[x,]$Variable) {
+            var_name = var_name[z]
+            break
+          } 
+        }  
       }
     }
     if (length(var_name) > 1) {
@@ -187,9 +229,9 @@ load_file = function (file_name, dir_path) {
 match_terms = function(df_object) {
   matches = match(df_object$object, rownames(taxon_ref))
   for(j in seq(along=matches)) {
-    if ( ! is.na(matches[j])) {
-      df_object$object[j] = taxon_ref[matches[j],2]
-      df_object$pred_value[j] = gsub('^.*\\/(.*)\\>$', '\\1', taxon_ref[matches[j],4], perl=TRUE)
+    if ( !(is.na(matches[j]))) {
+      df_object$object[j] = taxon_ref[matches[j],"term_label"]
+      df_object$pred_value[j] = gsub('^.*\\/(.*)$', '\\1', taxon_ref[matches[j],"term_ontology_url"], perl=TRUE)
     }
   }
   return(df_object)  
@@ -199,10 +241,10 @@ match_terms = function(df_object) {
 parse_dates = function(df_object) {
   nrows = dim(df_object)[1]
   for (i in 1:nrows) {
-    if (grepl("dateTime", as.character(df_object[i,3]), perl = TRUE)) {
-      df_object[i,3] = substr(df_object[i,3], 2, 11)
-    }
-  }
+     if ( (grepl("http://purl.org/dc/terms/date", as.character(df_object[i,"predicate"]), perl = TRUE)) || (grepl("http://purl.org/dc/terms/created", as.character(df_object[i,"predicate"]), perl = TRUE)) || (grepl("http://purl.org/dc/terms/modified", as.character(df_object[i,"predicate"]), perl = TRUE))) {
+       df_object[i,"object"] = substr(df_object[i,"object"], 1, 10)
+     }
+   }
   return(df_object)
 }
 
@@ -240,8 +282,32 @@ remove_quotes = function(quoted_string) {
   return(unquoted_string)
 }
 
-# RDF downloads UTF-8 text, and in the process, converts it to Java/Javascript encoding.  This function converts it back to UTF-8.
-to_utf8 = function(x) {
-  y <- iconv(x, "JAVA", "UTF-8")
-  return(y)
+# Get json/sparql query for a user
+user_json = function(dir_data, dir_scripts, sparql_endpoint, sparql_key, user_id, user_url) {
+  user_json = paste(dir_data, "/temp/", user_id, "_json.txt", sep="")
+  get_json = paste("python3.3 ", dir_scripts, "/sparql_call.py ", sparql_endpoint, " ", sparql_key, " ", "user", " ", user_id, " ", user_json, sep="")
+  system(get_json)
+  user_list = fromJSON(user_json)
+  
+  top_names = names(user_list)
+  predicate = c()
+  object = c()
+  
+  if (length(top_names) > 0) {
+    for (i in 1:length(top_names)) {
+      user_leaf = unlist(user_list[[top_names[i]]], recursive = TRUE)
+      lnames = names(user_leaf)
+      for (j in 1:length(lnames)) {
+        if (grepl('^.*\\.value$', lnames[j], ignore.case = FALSE, perl = FALSE)) { 
+          predicate = c(predicate, gsub('^(.*)\\.value$', '\\1', lnames[j], perl=TRUE))
+          object = c(object, user_leaf[[lnames[j]]])
+        }
+      }
+    }
+   subject = rep(user_url,length(object))
+  } else {
+    subject = c()
+  }
+  df = as.data.frame(cbind(subject,predicate,object))
+  return(df)
 }
