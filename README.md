@@ -4,16 +4,16 @@ eXFrame is a reusable framework for building genomics experiments repositories.
 ## CONTENTS OF THIS FILE
 ---------------------
 
-  * [Introduction](introduction)
-  * [Requirements](requirements)
-  * [Recommended Modules](recommended-modules)
-  * [Installation](installation)
-  * [Configuration](configuration)
-  * [Support](support)
-  * [Contributing](contributing)
-  * [Maintainers](maintainers)
-  * [License](license)
-  * [Citations](citations)
+  * [Introduction](./README.md#introduction)
+  * [Requirements](./README.md#requirements)
+  * [Recommended Modules](./README.md#recommended-modules)
+  * [Installation](./README.md#installation)
+  * [Configuration](./README.md#configuration)
+  * [Support](./README.md#support)
+  * [Contributing](./README.md#contributing)
+  * [Maintainers](./README.md#maintainers)
+  * [License](./README.md#license)
+  * [Citations](./README.md#citations)
   
 ### INTRODUCTION
 ------------
